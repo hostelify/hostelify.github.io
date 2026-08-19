@@ -1,0 +1,671 @@
+/* =========================================
+   TOOLBAR
+========================================= */
+
+.admin-toolbar {
+
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 14px;
+
+}
+
+.admin-search {
+
+    flex: 1;
+    min-width: 200px;
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #2a2d36;
+    border-radius: 10px;
+    background: #1a1c22;
+    color: #e1e4ea;
+    font-family: inherit;
+    font-size: 13px;
+    outline: none;
+
+}
+
+.admin-search:focus {
+    border-color: #6366f1;
+}
+
+body.light-theme .admin-search {
+    background: #fafafa;
+    border-color: #e1e4e8;
+    color: #111827;
+}
+
+
+/* =========================================
+   BUTTONS
+========================================= */
+
+.admin-btn {
+
+    height: 42px;
+    padding: 0 18px;
+    border: none;
+    border-radius: 10px;
+    background: #e1e4ea;
+    color: #0f1117;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+
+}
+
+.admin-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.admin-btn.secondary {
+    background: #1e2028;
+    color: #e1e4ea;
+    border: 1px solid #303344;
+}
+
+body.light-theme .admin-btn {
+    background: #111827;
+    color: #ffffff;
+}
+
+body.light-theme .admin-btn.secondary {
+    background: #ffffff;
+    color: #111827;
+    border-color: #dedfe4;
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.admin-table-wrap {
+
+    overflow-x: auto;
+    border: 1px solid #252830;
+    border-radius: 16px;
+    background: #16181f;
+
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+}
+
+.admin-table th {
+
+    padding: 13px 14px;
+    text-align: left;
+    color: #6b7080;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    border-bottom: 1px solid #252830;
+    white-space: nowrap;
+
+}
+
+.admin-table td {
+
+    padding: 12px 14px;
+    color: #c8ccd4;
+    border-bottom: 1px solid #1e2028;
+    white-space: nowrap;
+
+}
+
+.admin-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.admin-table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.02);
+}
+
+body.light-theme .admin-table-wrap {
+    background: #ffffff;
+    border-color: #e2e4e8;
+}
+
+body.light-theme .admin-table th {
+    color: #858a94;
+    border-bottom-color: #ececef;
+}
+
+body.light-theme .admin-table td {
+    color: #374151;
+    border-bottom-color: #f0f1f3;
+}
+
+body.light-theme .admin-table tbody tr:hover {
+    background: rgba(15, 23, 42, 0.02);
+}
+
+
+/* =========================================
+   STATUS BADGE (Allocated only, for now)
+========================================= */
+
+.status-badge.allocated {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 10.5px;
+    font-weight: 700;
+    background: rgba(80, 220, 130, 0.12);
+    color: #4b8b5a;
+}
+
+body.dark-theme .status-badge.allocated {
+    color: #7fd996;
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media (max-width: 700px) {
+
+    .admin-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .admin-search {
+        min-width: 0;
+    }
+
+}
+/* =========================================
+   TABS
+========================================= */
+
+.admin-tabs {
+
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    border-bottom: 1px solid #252830;
+
+}
+
+.admin-tab {
+
+    padding: 10px 16px;
+    border: none;
+    background: transparent;
+    color: #6b7080;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: color 0.15s ease, border-color 0.15s ease;
+
+}
+
+.admin-tab:hover {
+    color: #c8ccd4;
+}
+
+.admin-tab.active {
+    color: #e1e4ea;
+    border-bottom-color: #6366f1;
+}
+
+body.light-theme .admin-tabs {
+    border-bottom-color: #ececef;
+}
+
+body.light-theme .admin-tab {
+    color: #858a94;
+}
+
+body.light-theme .admin-tab:hover {
+    color: #374151;
+}
+
+body.light-theme .admin-tab.active {
+    color: #111827;
+    border-bottom-color: #6366f1;
+}
+
+
+/* =========================================
+   PRIORITY BADGES
+========================================= */
+
+.status-badge.priority-intl {
+    background: rgba(99, 102, 241, 0.14);
+    color: #8385f5;
+}
+
+.status-badge.priority-outside {
+    background: rgba(240, 180, 60, 0.14);
+    color: #d6a13c;
+}
+
+.status-badge.priority-delhi {
+    background: rgba(107, 114, 128, 0.16);
+    color: #9aa0ac;
+}
+
+body.dark-theme .status-badge.priority-intl {
+    color: #a5a7fb;
+}
+
+body.dark-theme .status-badge.priority-outside {
+    color: #f0c877;
+}
+
+body.dark-theme .status-badge.priority-delhi {
+    color: #c3c8d1;
+}
+/* ============================================================
+   APP SHELL / SIDEBAR
+   ============================================================
+   Works with the existing body.light-theme / body.dark-theme
+   classes toggled in admin-dashboard.js. Falls back to sane
+   colors on its own so it won't break if admin-style.css uses
+   different variable names.
+*/
+
+.app-shell {
+    display: flex;
+    min-height: 100vh;
+    align-items: stretch;
+}
+
+.portal-container {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* -------------------- SIDEBAR -------------------- */
+
+.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 14px;
+    background: #ffffff;
+    border-right: 1px solid #e5e7eb;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    z-index: 40;
+}
+
+body.dark-theme .sidebar {
+    background: #14171f;
+    border-right-color: #2a2f3a;
+}
+
+.sidebar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px 8px 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+body.dark-theme .sidebar-brand {
+    border-bottom-color: #2a2f3a;
+}
+
+.sidebar-brand .brand-logo {
+    width: 34px;
+    height: 34px;
+    border-radius: 9px;
+    background: #4f46e5;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13px;
+    flex-shrink: 0;
+}
+
+.sidebar-brand .brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.sidebar-brand .brand-text strong {
+    font-size: 14px;
+    color: #111827;
+}
+
+body.dark-theme .sidebar-brand .brand-text strong {
+    color: #f3f4f6;
+}
+
+.sidebar-brand .brand-text span {
+    font-size: 11.5px;
+    color: #6b7280;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.sidebar-section-label {
+    margin: 14px 8px 2px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #9ca3af;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 9px;
+    background: transparent;
+    color: #4b5563;
+    font-size: 13.5px;
+    font-weight: 500;
+    text-align: left;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+
+.sidebar-link .icon {
+    font-size: 15px;
+    width: 18px;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.sidebar-link:hover {
+    background: #f3f4f6;
+    color: #111827;
+}
+
+.sidebar-link.active {
+    background: #eef2ff;
+    color: #4338ca;
+}
+
+body.dark-theme .sidebar-link {
+    color: #9ca3af;
+}
+
+body.dark-theme .sidebar-link:hover {
+    background: #1c2028;
+    color: #e5e7eb;
+}
+
+body.dark-theme .sidebar-link.active {
+    background: #232848;
+    color: #a5b4fc;
+}
+
+.sidebar-footer {
+    margin-top: auto;
+    padding: 10px 8px 2px;
+    border-top: 1px solid #e5e7eb;
+}
+
+body.dark-theme .sidebar-footer {
+    border-top-color: #2a2f3a;
+}
+
+.sidebar-footer-label {
+    font-size: 11px;
+    color: #9ca3af;
+}
+
+/* -------------------- MOBILE TOGGLE -------------------- */
+
+.sidebar-toggle {
+    display: none;
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 60;
+    width: 38px;
+    height: 38px;
+    border-radius: 9px;
+    border: 1px solid #e5e7eb;
+    background: #ffffff;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    cursor: pointer;
+}
+
+.sidebar-toggle span {
+    display: block;
+    width: 18px;
+    height: 2px;
+    background: #374151;
+    border-radius: 2px;
+}
+
+body.dark-theme .sidebar-toggle {
+    background: #14171f;
+    border-color: #2a2f3a;
+}
+
+body.dark-theme .sidebar-toggle span {
+    background: #d1d5db;
+}
+
+.sidebar-backdrop {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 39;
+}
+
+@media (max-width: 900px) {
+
+    .sidebar-toggle {
+        display: flex;
+    }
+
+    .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        box-shadow: 2px 0 16px rgba(0, 0, 0, 0.15);
+        transition: transform 0.2s ease;
+    }
+
+    .sidebar.open {
+        transform: translateX(0);
+    }
+
+    .sidebar.open ~ .sidebar-backdrop,
+    .sidebar-backdrop.open {
+        display: block;
+    }
+
+    .navbar-brand-mobile-hidden {
+        margin-left: 46px;
+    }
+
+}
+
+/* ============================================================
+   DEV TOOLS VIEW
+   ============================================================ */
+
+.devtools-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    max-width: 720px;
+}
+
+.devtools-banner {
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    color: #92400e;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+body.dark-theme .devtools-banner {
+    background: #2a2410;
+    border-color: #4d3f10;
+    color: #fbbf24;
+}
+
+.devtools-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+}
+
+.stat-box {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    padding: 14px;
+    border-radius: 10px;
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+}
+
+body.dark-theme .stat-box {
+    background: #191d26;
+    border-color: #2a2f3a;
+}
+
+.stat-value {
+    font-size: 22px;
+    font-weight: 700;
+    color: #111827;
+}
+
+body.dark-theme .stat-value {
+    color: #f3f4f6;
+}
+
+.stat-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.devtools-card {
+    padding: 16px;
+    border-radius: 12px;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+}
+
+body.dark-theme .devtools-card {
+    background: #14171f;
+    border-color: #2a2f3a;
+}
+
+.devtools-card h2 {
+    margin: 0 0 4px;
+    font-size: 15px;
+    color: #111827;
+}
+
+body.dark-theme .devtools-card h2 {
+    color: #f3f4f6;
+}
+
+.devtools-hint {
+    margin: 0 0 12px;
+    font-size: 12.5px;
+    color: #6b7280;
+    line-height: 1.5;
+}
+
+.devtools-form-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.devtools-form-row label {
+    font-size: 13px;
+    color: #4b5563;
+}
+
+body.dark-theme .devtools-form-row label {
+    color: #9ca3af;
+}
+
+.devtools-form-row input[type="number"] {
+    width: 100px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #d1d5db;
+    background: #fff;
+    color: #111827;
+    font-size: 13.5px;
+}
+
+body.dark-theme .devtools-form-row input[type="number"] {
+    background: #0f1117;
+    border-color: #2a2f3a;
+    color: #f3f4f6;
+}
+
+/* Extra button variants used by the Dev Tools panel.
+   Kept scoped/!important-free so they layer on top of whatever
+   .admin-btn base styles already exist in admin-style.css. */
+
+.admin-btn.primary {
+    background: #4f46e5;
+    border-color: #4f46e5;
+    color: #fff;
+}
+
+.admin-btn.primary:hover {
+    background: #4338ca;
+}
+
+.admin-btn.danger {
+    background: #fef2f2;
+    border-color: #fecaca;
+    color: #b91c1c;
+}
+
+body.dark-theme .admin-btn.danger {
+    background: #2a1414;
+    border-color: #5c1f1f;
+    color: #fca5a5;
+}
+
+.admin-btn.danger:hover {
+    background: #fee2e2;
+}

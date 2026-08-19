@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <button id="themeToggle" class="floating-toggle" type="button" aria-label="Toggle theme" title="Toggle theme">
+        <span id="themeIcon" aria-hidden="true">☀️</span>
+    </button>
+
+    <div class="container">
+        <div class="card">
+
+            <div class="card-header">
+                <div class="logo">HA</div>
+                <span class="eyebrow">HOSTEL ALLOCATION</span>
+                <h1>Admin Login</h1>
+                <p>Sign in to manage registrations, rooms and allocations.</p>
+            </div>
+
+            <form id="adminLoginForm" autocomplete="off">
+
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" placeholder="Enter admin username" required autocomplete="off">
+                </div>
+
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <div class="password-field">
+                        <input type="password" id="password" name="password" placeholder="Enter admin password" required autocomplete="off">
+                        <button type="button" class="password-toggle" id="passwordToggle" aria-label="Show password">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <p id="message"></p>
+
+                <button type="submit" id="submitBtn">Sign In</button>
+
+            </form>
+
+        </div>
+    </div>
+
+    <script src="admin-login.js"></script>
+</body>
+</html>
