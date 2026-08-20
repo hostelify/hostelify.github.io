@@ -573,93 +573,93 @@ if (hostelForm) {
                 fullName:
                     document
                         .getElementById("fullName")
-                        .value
+                        .value()
                         .trim(),
 
                 email:
                     document
                         .getElementById("email")
-                        .value
+                        .value()
                         .trim(),
 
                 phone:
                     document
                         .getElementById("phone")
-                        .value
+                        .value()
                         .trim(),
 
                 gender:
                     document
                         .getElementById("gender")
-                        .value,
+                        .value(),
 
                 dob:
                     document
                         .getElementById("dob")
-                        .value,
+                        .value(),
 
                 course:
                     document
                         .getElementById("course")
-                        .value
+                        .value()
                         .trim(),
 
                 homeLocation:
                     document
                         .getElementById("homeLocation")
-                        .value,
+                        .value(),
 
                 fatherName:
                     document
                         .getElementById("fatherName")
-                        .value
+                        .value()
                         .trim(),
 
                 fatherPhone:
                     document
                         .getElementById("fatherPhone")
-                        .value
+                        .value()
                         .trim(),
 
                 motherName:
                     document
                         .getElementById("motherName")
-                        .value
+                        .value()
                         .trim(),
 
                 motherPhone:
                     document
                         .getElementById("motherPhone")
-                        .value
+                        .value()
                         .trim(),
 
                 pinCode:
                     document
                         .getElementById("pinCode")
-                        .value
+                        .value()
                         .trim(),
 
                 residenceAddress:
                     document
                         .getElementById("residenceAddress")
-                        .value
+                        .value()
                         .trim(),
 
                 officeAddress:
                     document
                         .getElementById("officeAddress")
-                        .value
+                        .value()
                         .trim(),
 
                 roomType:
                     document
                         .getElementById("roomType")
-                        .value,
+                        .value(),
 
                 academicYear:
                     document
                         .getElementById("academicYear")
-                        .value
+                        .value()
 
             };
 
