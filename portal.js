@@ -516,308 +516,299 @@ checkRegistrationStatus();
 
 if (hostelForm) {
 
-    hostelForm.addEventListener(
-        "submit",
-        async function (event) {
+    hostelForm.addEventListener("submit", async function (event) {
 
-            event.preventDefault();
+        event.preventDefault();
 
-
-            // ------------------------------------------------
-            // SAFETY
-            // ------------------------------------------------
-
-            if (!token || !enrollmentId) {
-
-                hostelMessage.textContent =
-                    "Your session has expired. Please login again.";
-
-                hostelMessage.className =
-                    "hostel-form-message error";
-
-                return;
-
-            }
+        console.log("Hostel registration submit triggered");
 
 
-            // ------------------------------------------------
-            // VALIDATION
-            // ------------------------------------------------
+        // ------------------------------------------------
+        // SAFETY CHECK
+        // ------------------------------------------------
 
-            if (
-                !hostelForm.checkValidity()
-            ) {
-
-                hostelForm.reportValidity();
-
-                return;
-
-            }
-
-
-            // ------------------------------------------------
-            // COLLECT DATA
-            // ------------------------------------------------
-
-            const registrationData = {
-
-                action:
-                    "saveHostelRegistration",
-
-                token:
-                    token,
-
-                enrollmentId:
-                    enrollmentId,
-
-                fullName:
-                    document
-                        .getElementById("fullName")
-                        .value()
-                        .trim(),
-
-                email:
-                    document
-                        .getElementById("email")
-                        .value()
-                        .trim(),
-
-                phone:
-                    document
-                        .getElementById("phone")
-                        .value()
-                        .trim(),
-
-                gender:
-                    document
-                        .getElementById("gender")
-                        .value(),
-
-                dob:
-                    document
-                        .getElementById("dob")
-                        .value(),
-
-                course:
-                    document
-                        .getElementById("course")
-                        .value()
-                        .trim(),
-
-                homeLocation:
-                    document
-                        .getElementById("homeLocation")
-                        .value(),
-
-                fatherName:
-                    document
-                        .getElementById("fatherName")
-                        .value()
-                        .trim(),
-
-                fatherPhone:
-                    document
-                        .getElementById("fatherPhone")
-                        .value()
-                        .trim(),
-
-                motherName:
-                    document
-                        .getElementById("motherName")
-                        .value()
-                        .trim(),
-
-                motherPhone:
-                    document
-                        .getElementById("motherPhone")
-                        .value()
-                        .trim(),
-
-                pinCode:
-                    document
-                        .getElementById("pinCode")
-                        .value()
-                        .trim(),
-
-                residenceAddress:
-                    document
-                        .getElementById("residenceAddress")
-                        .value()
-                        .trim(),
-
-                officeAddress:
-                    document
-                        .getElementById("officeAddress")
-                        .value()
-                        .trim(),
-
-                roomType:
-                    document
-                        .getElementById("roomType")
-                        .value(),
-
-                academicYear:
-                    document
-                        .getElementById("academicYear")
-                        .value()
-
-            };
-
-
-            // ------------------------------------------------
-            // DISABLE SUBMIT BUTTON
-            // ------------------------------------------------
-
-            submitHostelBtn.disabled =
-                true;
-
-
-            submitHostelBtn.innerHTML =
-                `
-                <span>Saving...</span>
-                <span>✓</span>
-                `;
-
+        if (!token || !enrollmentId) {
 
             hostelMessage.textContent =
-                "";
+                "Your session has expired. Please login again.";
+
+            hostelMessage.className =
+                "hostel-form-message error";
+
+            return;
+
+        }
+
+
+        // ------------------------------------------------
+        // FORM VALIDATION
+        // ------------------------------------------------
+
+        if (!hostelForm.checkValidity()) {
+
+            hostelForm.reportValidity();
+
+            return;
+
+        }
+
+
+        // ------------------------------------------------
+        // COLLECT FORM DATA
+        // ------------------------------------------------
+
+        const registrationData = {
+
+            action: "saveHostelRegistration",
+
+            token: token,
+
+            enrollmentId: enrollmentId,
+
+            fullName:
+                document.getElementById("fullName").value.trim(),
+
+            email:
+                document.getElementById("email").value.trim(),
+
+            gender:
+                document.getElementById("gender").value,
+
+            course:
+                document.getElementById("course").value.trim(),
+
+            homeLocation:
+                document.getElementById("homeLocation").value,
+
+            pinCode:
+                document.getElementById("pinCode").value.trim(),
+
+            roomType:
+                document.getElementById("roomType").value,
+
+            academicYear:
+                document.getElementById("academicYear").value
+
+        };
+
+
+        console.log(
+            "Registration data:",
+            registrationData
+        );
+
+
+        // ------------------------------------------------
+        // DISABLE BUTTON
+        // ------------------------------------------------
+
+        if (submitHostelBtn) {
+
+            submitHostelBtn.disabled = true;
+
+            submitHostelBtn.innerHTML = `
+                <span>Saving...</span>
+                <span>✓</span>
+            `;
+
+        }
+
+
+        hostelMessage.textContent = "";
+
+        hostelMessage.className =
+            "hostel-form-message";
+
+
+        // ------------------------------------------------
+        // SEND TO GOOGLE APPS SCRIPT
+        // ------------------------------------------------
+
+        try {
+
+            const response = await fetch(
+                API_URL,
+                {
+                    method: "POST",
+
+                    body: JSON.stringify(
+                        registrationData
+                    )
+                }
+            );
+
+
+            console.log(
+                "Server response:",
+                response
+            );
 
 
             // ------------------------------------------------
-            // SEND TO DATABASE
+            // CHECK HTTP RESPONSE
             // ------------------------------------------------
 
-            try {
-
-                const response =
-                    await fetch(
-                        API_URL,
-                        {
-
-                            method: "POST",
-
-                            body:
-                                JSON.stringify(
-                                    registrationData
-                                )
-
-                        }
-                    );
-
-
-                const result =
-                    await response.json();
-
-
-                // =================================================
-                // SUCCESS
-                // =================================================
-
-                if (
-                    result.success
-                ) {
-
-                    /*
-                     * Mark locally for instant loading
-                     * next time.
-                     */
-
-                    localStorage.setItem(
-                        localSubmissionKey,
-                        "true"
-                    );
-
-
-                    /*
-                     * IMPORTANT:
-                     *
-                     * Only hide the form AFTER the
-                     * database confirms success.
-                     */
-
-                    showSubmittedState();
-
-
-                    return;
-
-                }
-
-
-                // =================================================
-                // ALREADY REGISTERED
-                // =================================================
-
-                if (
-                    result.alreadyRegistered
-                ) {
-
-                    localStorage.setItem(
-                        localSubmissionKey,
-                        "true"
-                    );
-
-
-                    showSubmittedState();
-
-
-                    return;
-
-                }
-
-
-                // =================================================
-                // SERVER ERROR
-                // =================================================
+            if (!response.ok) {
 
                 throw new Error(
-                    result.message ||
-                    "Registration could not be saved."
+                    `Server returned ${response.status}`
                 );
 
+            }
 
-            } catch (error) {
 
-                console.error(
-                    "Hostel registration error:",
-                    error
+            // ------------------------------------------------
+            // READ RESPONSE
+            // ------------------------------------------------
+
+            const result =
+                await response.json();
+
+
+            console.log(
+                "Registration result:",
+                result
+            );
+
+
+            // =================================================
+            // SESSION INVALID
+            // =================================================
+
+            if (
+                result.sessionValid === false
+            ) {
+
+                localStorage.removeItem(
+                    "studentToken"
                 );
 
-
-                /*
-                 * Database failed.
-                 *
-                 * Keep the form visible so the
-                 * student can retry.
-                 */
-
-                showRegistrationForm();
-
-
-                submitHostelBtn.disabled =
-                    false;
-
-
-                submitHostelBtn.innerHTML =
-                    `
-                    <span>Save Registration</span>
-                    <span>→</span>
-                    `;
+                localStorage.removeItem(
+                    "enrollmentId"
+                );
 
 
                 hostelMessage.textContent =
-                    "Unable to save registration. Please try again.";
-
+                    "Your session has expired. Redirecting to login...";
 
                 hostelMessage.className =
                     "hostel-form-message error";
 
+
+                setTimeout(function () {
+
+                    window.location.replace(
+                        "index.html"
+                    );
+
+                }, 1000);
+
+
+                return;
+
             }
 
+
+            // =================================================
+            // SUCCESS
+            // =================================================
+
+            if (
+                result.success === true
+            ) {
+
+                localStorage.setItem(
+                    localSubmissionKey,
+                    "true"
+                );
+
+
+                showSubmittedState();
+
+
+                return;
+
+            }
+
+
+            // =================================================
+            // ALREADY REGISTERED
+            // =================================================
+
+            if (
+                result.alreadyRegistered === true
+            ) {
+
+                localStorage.setItem(
+                    localSubmissionKey,
+                    "true"
+                );
+
+
+                showSubmittedState();
+
+
+                return;
+
+            }
+
+
+            // =================================================
+            // SERVER RETURNED AN ERROR
+            // =================================================
+
+            throw new Error(
+                result.message ||
+                "Registration could not be saved."
+            );
+
+
+        } catch (error) {
+
+            console.error(
+                "Hostel registration error:",
+                error
+            );
+
+
+            // ------------------------------------------------
+            // KEEP FORM OPEN
+            // ------------------------------------------------
+
+            showRegistrationForm();
+
+
+            // ------------------------------------------------
+            // RESTORE BUTTON
+            // ------------------------------------------------
+
+            if (submitHostelBtn) {
+
+                submitHostelBtn.disabled = false;
+
+                submitHostelBtn.innerHTML = `
+                    <span>Save Registration</span>
+                    <span>→</span>
+                `;
+
+            }
+
+
+            // ------------------------------------------------
+            // SHOW ERROR
+            // ------------------------------------------------
+
+            hostelMessage.textContent =
+                "Unable to save registration. Please try again.";
+
+            hostelMessage.className =
+                "hostel-form-message error";
+
         }
-    );
+
+    });
 
 }
-
 
 // ============================================================
 // LOGOUT
