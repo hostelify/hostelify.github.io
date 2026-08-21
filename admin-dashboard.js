@@ -1,7 +1,7 @@
 // ============================================================
 // CONFIG — fill in your deployed Apps Script Web App URL
 // ============================================================
-const API_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+const API_URL = 'https://script.google.com/macros/s/AKfycbwSLgrm424r3kD_WHk9rft4yPCMECa2ZaK6CaMSjL-HbpjVY8M6QqJDyA8kvEzO1g8l/exec';
 
 // ============================================================
 // API HELPER
