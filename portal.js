@@ -307,7 +307,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 localStorage.removeItem("studentStatus");
                 localStorage.removeItem("studentEmail");
 
-                window.location.href = "login.html";
+                window.location.href = "index.html";
 
             }
         );
@@ -325,7 +325,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     if (!studentId) {
 
-        window.location.href = "login.html";
+        window.location.href = "index.html";
 
         return;
 
