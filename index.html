@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Login | Hostel Portal</title>
+
+    <link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+
+<button id="themeToggle" class="floating-toggle" aria-label="Toggle theme">
+    <span id="themeIcon">☀️</span>
+</button>
+
+
+<div class="container">
+
+    <div class="card">
+
+
+        <!-- Header -->
+
+        <div class="card-header">
+
+            <h1>
+                Welcome Back
+            </h1>
+
+            <p>
+                Login to access your Hostel portal.
+            </p>
+
+        </div>
+
+
+
+        <!-- Login Form -->
+
+        <form id="loginForm">
+
+
+            <!-- Student ID -->
+
+            <div class="input-group">
+
+                <label for="studentId">
+                    Student ID
+                </label>
+
+                <input
+                  type="text"
+                  id="studentId"
+                  placeholder="Enter your 8-digit Student ID"
+                  autocomplete="username"
+                  inputmode="numeric"
+                  maxlength="8"
+                  pattern="[0-9]{8}"
+                  required
+                >
+
+            </div>
+
+
+
+            <!-- Password -->
+
+            <div class="input-group">
+
+                <div class="label-row">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                </div>
+
+
+                <div class="password-field">
+
+                    <input
+                      type="password"
+                      id="password"
+                      placeholder="Enter your password"
+                      autocomplete="current-password"
+                      minlength="8"
+                      required
+                    >
+
+                    <button
+                        type="button"
+                        id="togglePassword"
+                        class="password-toggle"
+                        aria-label="Show password"
+                        aria-pressed="false"
+                        tabindex="-1"
+                    >
+
+                        <svg
+                            id="eyeIcon"
+                            viewBox="0 0 24 24"
+                            aria-hidden="true"
+                        >
+
+                            <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z" />
+
+                            <circle cx="12" cy="12" r="3" />
+
+                        </svg>
+
+                    </button>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- Remember me / Forgot password -->
+
+            <div class="login-options">
+
+                <label class="remember-me">
+
+                    <input
+                        type="checkbox"
+                        id="rememberMe"
+                    >
+
+                    Remember me
+
+                </label>
+
+
+                <a
+                    href="forgot-password.html"
+                    class="forgot-link"
+                >
+                    Forgot password?
+                </a>
+
+            </div>
+
+
+
+            <!-- Message -->
+
+            <p id="message"></p>
+
+
+
+            <!-- Login Button -->
+
+            <button
+                type="submit"
+                id="loginBtn"
+            >
+                Login
+            </button>
+
+
+        </form>
+
+
+
+        <!-- Register -->
+
+        <div class="login-link">
+
+            Don't have an account?
+
+            <a href="register.html">
+                Create one
+            </a>
+
+        </div>
+
+        <!-- Admin Login -->
+
+<div class="admin-login-link">
+
+    <span>Administrator?</span>
+
+    <a href="admin-login.html">
+        Admin Login
+    </a>
+
+</div>
+
+
+    </div>
+
+</div>
+
+
+
+<script src="login.js"></script>
+
+</body>
+
+</html>
