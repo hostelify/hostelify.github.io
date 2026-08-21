@@ -9,7 +9,7 @@ document.addEventListener("DOMContentLoaded", function () {
     // ========================================================
 
     const API_URL =
-        "PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE";
+        "https://script.google.com/macros/s/AKfycbwSLgrm424r3kD_WHk9rft4yPCMECa2ZaK6CaMSjL-HbpjVY8M6QqJDyA8kvEzO1g8l/exec";
 
 
     // ========================================================
