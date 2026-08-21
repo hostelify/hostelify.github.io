@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Admin Login</title>
+
+    <link rel="stylesheet" href="admin-login.css">
+</head>
+
+<body>
+
+    <!-- THEME TOGGLE -->
+    <button
+        id="themeToggle"
+        class="floating-toggle"
+        type="button"
+        aria-label="Switch to light mode"
+        title="Switch to light mode"
+    >
+        <span id="themeIcon" aria-hidden="true">☀️</span>
+    </button>
+
+
+    <!-- LOGIN CONTAINER -->
+    <div class="container">
+
+        <div class="card">
+
+            <!-- HEADER -->
+            <div class="card-header">
+
+                <h1>Admin Login</h1>
+
+                
+
+            </div>
+
+
+            <!-- LOGIN FORM -->
+            <form id="adminLoginForm" autocomplete="off">
+
+                <!-- USERNAME -->
+                <div class="input-group">
+
+                    <label for="username">
+                        Username
+                    </label>
+
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter admin username"
+                        required
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+                <!-- PASSWORD -->
+                <div class="input-group">
+
+                    <label for="password">
+                        Password
+                    </label>
+
+                    <div class="password-field">
+
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            placeholder="Enter admin password"
+                            required
+                            autocomplete="off"
+                        >
+
+                        <button
+                            type="button"
+                            class="password-toggle"
+                            id="passwordToggle"
+                            aria-label="Show password"
+                            title="Show password"
+                        >
+
+                            <!-- NORMAL EYE -->
+                            <svg
+                                viewBox="0 0 24 24"
+                                aria-hidden="true"
+                            >
+                                <path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7z"></path>
+                                <circle
+                                    cx="12"
+                                    cy="12"
+                                    r="3"
+                                ></circle>
+                            </svg>
+
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <!-- ERROR / MESSAGE -->
+                <p id="message"></p>
+
+
+                <!-- SIGN IN -->
+                <button
+                    type="submit"
+                    id="submitBtn"
+                >
+                    Sign In
+                </button>
+
+
+                <!-- USER LOGIN -->
+                <div class="user-login-option">
+
+                    <span>Not an admin?</span>
+
+                    <a href="index.html">
+                        Login as User
+                    </a>
+
+                </div>
+
+            </form>
+
+        </div>
+
+    </div>
+
+
+    <script src="admin-login.js"></script>
+
+</body>
+</html>
