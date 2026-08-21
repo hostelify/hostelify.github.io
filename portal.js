@@ -367,6 +367,440 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ========================================================
+    // VIEW ELEMENTS: FORM VS "ALREADY SUBMITTED"
+    // ========================================================
+
+    const registrationFormView =
+        document.getElementById("registrationFormView");
+
+    const alreadySubmittedView =
+        document.getElementById("alreadySubmittedView");
+
+    const editRegistrationBtn =
+        document.getElementById("editRegistrationBtn");
+
+    const withdrawRegistrationBtn =
+        document.getElementById("withdrawRegistrationBtn");
+
+    const alreadySubmittedMessage =
+        document.getElementById("alreadySubmittedMessage");
+
+
+    // ========================================================
+    // STATUS BAR ELEMENTS
+    // ========================================================
+
+    const queueNoValue =
+        document.getElementById("queueNoValue");
+
+    const allocationStatusDot =
+        document.getElementById("allocationStatusDot");
+
+    const allocationStatusValue =
+        document.getElementById("allocationStatusValue");
+
+
+    // Keep the most recently fetched profile around so
+    // "Edit Registration" can prefill the form instantly.
+
+    let lastKnownProfile = null;
+
+
+    function showFormView() {
+
+        if (registrationFormView) {
+
+            registrationFormView.classList.remove("hidden");
+
+        }
+
+        if (alreadySubmittedView) {
+
+            alreadySubmittedView.classList.add("hidden");
+
+        }
+
+    }
+
+
+    function showAlreadySubmittedView() {
+
+        if (registrationFormView) {
+
+            registrationFormView.classList.add("hidden");
+
+        }
+
+        if (alreadySubmittedView) {
+
+            alreadySubmittedView.classList.remove("hidden");
+
+        }
+
+    }
+
+
+    // ========================================================
+    // MAP applicationStatus -> STATUS BAR LABEL / STYLE
+    // ========================================================
+
+    function updateStatusBar(data) {
+
+        if (!queueNoValue || !allocationStatusDot || !allocationStatusValue) {
+            return;
+        }
+
+        const status =
+            data && data.applicationStatus
+                ? String(data.applicationStatus).trim()
+                : "Registered";
+
+        const hasQueueNumber =
+            data &&
+            data.queueNumber !== undefined &&
+            data.queueNumber !== null &&
+            data.queueNumber !== "";
+
+        queueNoValue.textContent =
+            hasQueueNumber
+                ? String(data.queueNumber)
+                : "—";
+
+        allocationStatusDot.classList.remove(
+            "pending",
+            "allocated",
+            "not-allocated"
+        );
+
+        allocationStatusValue.classList.remove(
+            "pending",
+            "allocated",
+            "not-allocated"
+        );
+
+        if (status === "Allocated") {
+
+            allocationStatusDot.classList.add("allocated");
+            allocationStatusValue.classList.add("allocated");
+            allocationStatusValue.textContent = "Allocated";
+
+        } else if (status === "Not Allocated") {
+
+            allocationStatusDot.classList.add("not-allocated");
+            allocationStatusValue.classList.add("not-allocated");
+            allocationStatusValue.textContent = "Not Allocated";
+
+        } else {
+
+            // "Registered" or "Withdrawn" (or blank) both read
+            // as "Pending" from the student's point of view,
+            // since no allocation decision has been made yet.
+
+            allocationStatusDot.classList.add("pending");
+            allocationStatusValue.classList.add("pending");
+            allocationStatusValue.textContent = "Pending";
+
+        }
+
+    }
+
+
+    // ========================================================
+    // PREFILL FORM FIELDS FROM A PROFILE OBJECT
+    // ========================================================
+
+    function prefillFormFromProfile(profile) {
+
+        if (!profile) {
+            return;
+        }
+
+        const fieldMap = [
+            ["fullName", profile.name],
+            ["course", profile.course],
+            ["gender", profile.gender],
+            ["academicYear", profile.year],
+            ["hostelPreference", profile.hostelPreference],
+            ["pinCode", profile.housePincode],
+            ["homeLocation", profile.state]
+        ];
+
+        fieldMap.forEach(function (pair) {
+
+            const el =
+                document.getElementById(pair[0]);
+
+            if (el && pair[1] !== undefined && pair[1] !== null) {
+
+                el.value = pair[1];
+
+            }
+
+        });
+
+    }
+
+
+    // ========================================================
+    // FETCH CURRENT REGISTRATION STATE FROM THE BACKEND
+    // ========================================================
+
+    async function loadRegistrationState() {
+
+        try {
+
+            const body =
+                new URLSearchParams();
+
+            body.append("action", "getStudentProfile");
+            body.append("studentId", studentId);
+
+            const response =
+                await fetch(API_URL, {
+
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/x-www-form-urlencoded;charset=UTF-8"
+                    },
+
+                    body: body.toString()
+
+                });
+
+            if (!response.ok) {
+
+                throw new Error(
+                    "Server returned HTTP " +
+                    response.status
+                );
+
+            }
+
+            const result =
+                await response.json();
+
+            if (!result.success) {
+
+                // If we can't determine state, fall back to
+                // showing the (empty) registration form rather
+                // than blocking the student entirely.
+
+                showFormView();
+
+                return;
+
+            }
+
+            lastKnownProfile = result;
+
+            localStorage.setItem(
+                "studentStatus",
+                result.applicationStatus || "Registered"
+            );
+
+            updateStatusBar(result);
+
+            if (result.isProfileComplete) {
+
+                showAlreadySubmittedView();
+
+            } else {
+
+                prefillFormFromProfile(result.profile);
+
+                showFormView();
+
+            }
+
+        } catch (error) {
+
+            console.error(
+                "Failed to load registration state:",
+                error
+            );
+
+            // Network/parse failure: don't block the student,
+            // just show the form as a safe default.
+
+            showFormView();
+
+        }
+
+    }
+
+
+    // ========================================================
+    // EDIT REGISTRATION
+    // ========================================================
+
+    if (editRegistrationBtn) {
+
+        editRegistrationBtn.addEventListener(
+            "click",
+            function () {
+
+                if (lastKnownProfile && lastKnownProfile.profile) {
+
+                    prefillFormFromProfile(
+                        lastKnownProfile.profile
+                    );
+
+                }
+
+                showFormView();
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
+    // WITHDRAW REGISTRATION
+    // ========================================================
+
+    if (withdrawRegistrationBtn) {
+
+        withdrawRegistrationBtn.addEventListener(
+            "click",
+            async function () {
+
+                const confirmed =
+                    window.confirm(
+                        "Are you sure you want to withdraw your hostel registration? " +
+                        "You will need to fill the form again if you change your mind."
+                    );
+
+                if (!confirmed) {
+                    return;
+                }
+
+                withdrawRegistrationBtn.disabled = true;
+
+                if (editRegistrationBtn) {
+                    editRegistrationBtn.disabled = true;
+                }
+
+                if (alreadySubmittedMessage) {
+
+                    alreadySubmittedMessage.textContent = "";
+                    alreadySubmittedMessage.className =
+                        "hostel-form-message";
+
+                }
+
+                try {
+
+                    const body =
+                        new URLSearchParams();
+
+                    body.append("action", "withdrawRegistration");
+                    body.append("studentId", studentId);
+
+                    const response =
+                        await fetch(API_URL, {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded;charset=UTF-8"
+                            },
+
+                            body: body.toString()
+
+                        });
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned HTTP " +
+                            response.status
+                        );
+
+                    }
+
+                    const result =
+                        await response.json();
+
+                    if (!result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            "Failed to withdraw your registration."
+                        );
+
+                    }
+
+                    localStorage.setItem(
+                        "studentStatus",
+                        result.status || "Withdrawn"
+                    );
+
+                    // Clear the visible form so the student
+                    // starts fresh, then show it.
+
+                    const hostelFormEl =
+                        document.getElementById("hostelForm");
+
+                    if (hostelFormEl) {
+                        hostelFormEl.reset();
+                    }
+
+                    if (enrollmentIdInput) {
+                        enrollmentIdInput.value = studentId;
+                    }
+
+                    if (emailInput && studentEmail) {
+                        emailInput.value = studentEmail;
+                    }
+
+                    lastKnownProfile = null;
+
+                    updateStatusBar({
+                        applicationStatus: "Withdrawn",
+                        queueNumber: ""
+                    });
+
+                    showFormView();
+
+                } catch (error) {
+
+                    console.error(
+                        "Withdraw error:",
+                        error
+                    );
+
+                    if (alreadySubmittedMessage) {
+
+                        alreadySubmittedMessage.textContent =
+                            error.message ||
+                            "Unable to withdraw your registration. Please try again.";
+
+                        alreadySubmittedMessage.className =
+                            "hostel-form-message error-message";
+
+                    }
+
+                } finally {
+
+                    withdrawRegistrationBtn.disabled = false;
+
+                    if (editRegistrationBtn) {
+                        editRegistrationBtn.disabled = false;
+                    }
+
+                }
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
     // HOSTEL / PROFILE FORM SUBMISSION
     // ========================================================
 
@@ -579,6 +1013,12 @@ if (submitHostelBtnText) {
                         "success"
                     );
 
+                    // Refresh the registration state so the page
+                    // now flips to the "already submitted" screen,
+                    // with an up-to-date queue number/status.
+
+                    await loadRegistrationState();
+
 
                 } catch (error) {
 
@@ -614,5 +1054,12 @@ if (submitHostelBtnText) {
         );
 
     }
+
+
+    // ========================================================
+    // INITIAL LOAD: DECIDE WHICH VIEW TO SHOW
+    // ========================================================
+
+    loadRegistrationState();
 
 });
