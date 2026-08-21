@@ -310,29 +310,18 @@ if (loginForm) {
                 // SEND LOGIN REQUEST TO GOOGLE APPS SCRIPT
                 // ------------------------------------------------
 
-                const response =
-                    await fetch(API_URL) {
-
-                        method: "POST",
-
-                        headers: 
-                            "Content-Type":
-                                "text/plain;charset=utf-8"
-                        },
-
-                        body: JSON.stringify({
-
-                            action: "loginStudent",
-
-                            studentId:
-                                studentId,
-
-                            password:
-                                password
-
-                        })
-
-                    });
+const response =
+    await fetch(API_URL, {
+        method: "POST",
+        headers: {
+            "Content-Type": "text/plain;charset=utf-8"
+        },
+        body: JSON.stringify({
+            action: "loginStudent",
+            studentId: studentId,
+            password: password
+        })
+    });
 
 
                 // ------------------------------------------------
