@@ -376,8 +376,6 @@ document.addEventListener("DOMContentLoaded", function () {
     const hostelMessage =
         document.getElementById("hostelMessage");
 
-    const submitHostelBtn =
-        document.getElementById("submitHostelBtn");
 
     // adding registration button .....:
         const submitHostelBtn =
