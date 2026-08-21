@@ -5,6 +5,14 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     // ========================================================
+    // API CONFIG
+    // ========================================================
+
+    const API_URL =
+        "PASTE_YOUR_DEPLOYED_WEB_APP_URL_HERE";
+
+
+    // ========================================================
     // ELEMENTS
     // ========================================================
 
@@ -22,6 +30,9 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const message =
         document.getElementById("message");
+
+    const submitBtn =
+        document.getElementById("submitBtn");
 
     const themeToggle =
         document.getElementById("themeToggle");
@@ -90,8 +101,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (passwordIsHidden) {
 
-            // SHOW PASSWORD
-
             password.type = "text";
 
             passwordToggle.innerHTML =
@@ -108,8 +117,6 @@ document.addEventListener("DOMContentLoaded", function () {
             );
 
         } else {
-
-            // HIDE PASSWORD
 
             password.type = "password";
 
@@ -229,6 +236,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
 
     // ========================================================
+    // BUTTON LOADING STATE
+    // ========================================================
+
+    function setSubmitLoading(isLoading) {
+
+        submitBtn.disabled = isLoading;
+
+        submitBtn.textContent =
+            isLoading
+                ? "Signing in…"
+                : "Sign In";
+
+    }
+
+
+    // ========================================================
     // ADMIN LOGIN
     // ========================================================
 
@@ -256,24 +279,72 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
 
-        /*
-         * ====================================================
-         * BACKEND LOGIN
-         * ====================================================
-         *
-         * Put your existing admin authentication code here.
-         *
-         * Do NOT remove the code above when connecting
-         * your Google Apps Script/backend.
-         *
-         * ====================================================
-         */
+        setSubmitLoading(true);
 
 
-        console.log(
-            "Admin login submitted:",
-            user
-        );
+        const body = new URLSearchParams();
+
+        body.append("action", "adminLogin");
+        body.append("username", user);
+        body.append("password", pass);
+
+
+        fetch(API_URL, {
+            method: "POST",
+            body: body
+        })
+
+            .then(function (res) {
+
+                return res.json();
+
+            })
+
+            .then(function (data) {
+
+                setSubmitLoading(false);
+
+
+                if (data.success) {
+
+                    sessionStorage.setItem(
+                        "isAdmin",
+                        "true"
+                    );
+
+                    sessionStorage.setItem(
+                        "adminUsername",
+                        data.username
+                    );
+
+                    sessionStorage.setItem(
+                        "adminKey",
+                        pass
+                    );
+
+                    window.location.href =
+                        "admin-dashboard.html";
+
+                } else {
+
+                    message.textContent =
+                        data.message ||
+                        "Invalid username or password.";
+
+                }
+
+            })
+
+            .catch(function (err) {
+
+                setSubmitLoading(false);
+
+                message.textContent =
+                    "Network error. Please try again.";
+
+                console.error(err);
+
+            });
 
     });
 
