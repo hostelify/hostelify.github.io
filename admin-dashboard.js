@@ -1,4 +1,3 @@
-admin-dashboard.js
 
 // ============================================================
 // CONFIG — fill in your deployed Apps Script Web App URL
