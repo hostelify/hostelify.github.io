@@ -1,6 +1,14 @@
 // ============================================================
+// CONFIG
+// ============================================================
+
+const API_URL =
+    "https://script.google.com/macros/s/AKfycbwubkDfDCE6ZfHAho7amAGBnbhBVa_ir9QgT5N9xQ20HPvVTrpHT06zLauB7Ixkmxsw/exec";
+
+
+// ============================================================
 // PORTAL UI
-// THEME + USER DROPDOWN
+// THEME + USER DROPDOWN + PROFILE FORM
 // ============================================================
 
 document.addEventListener("DOMContentLoaded", function () {
@@ -23,6 +31,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
     const userDropdown =
         document.getElementById("userDropdown");
+
+    const dropdownEnrollmentText =
+        document.getElementById("dropdownEnrollmentText");
+
+    const dropdownLogoutBtn =
+        document.getElementById("dropdownLogoutBtn");
 
 
     // ========================================================
@@ -276,5 +290,310 @@ document.addEventListener("DOMContentLoaded", function () {
 
         }
     );
+
+
+    // ========================================================
+    // LOGOUT
+    // ========================================================
+
+    if (dropdownLogoutBtn) {
+
+        dropdownLogoutBtn.addEventListener(
+            "click",
+            function () {
+
+                localStorage.removeItem("studentId");
+                localStorage.removeItem("studentName");
+                localStorage.removeItem("studentStatus");
+                localStorage.removeItem("studentEmail");
+
+                window.location.href = "login.html";
+
+            }
+        );
+
+    }
+
+
+    // ========================================================
+    // AUTH GUARD
+    // Redirect to login if no student is signed in.
+    // ========================================================
+
+    const studentId =
+        localStorage.getItem("studentId");
+
+    if (!studentId) {
+
+        window.location.href = "login.html";
+
+        return;
+
+    }
+
+
+    // ========================================================
+    // PREFILL STUDENT ID FIELD + DROPDOWN LABEL
+    // ========================================================
+
+    const enrollmentIdInput =
+        document.getElementById("enrollmentId");
+
+    if (enrollmentIdInput) {
+
+        enrollmentIdInput.value = studentId;
+
+    }
+
+    if (dropdownEnrollmentText) {
+
+        dropdownEnrollmentText.textContent =
+            "ID: " + studentId;
+
+    }
+
+
+    const studentEmail =
+        localStorage.getItem("studentEmail");
+
+    const emailInput =
+        document.getElementById("email");
+
+    if (emailInput && studentEmail) {
+
+        emailInput.value = studentEmail;
+
+    }
+
+
+    // ========================================================
+    // HOSTEL / PROFILE FORM SUBMISSION
+    // ========================================================
+
+    const hostelForm =
+        document.getElementById("hostelForm");
+
+    const hostelMessage =
+        document.getElementById("hostelMessage");
+
+    const submitHostelBtn =
+        document.getElementById("submitHostelBtn");
+
+
+    function showHostelMessage(text, type) {
+
+        if (!hostelMessage) {
+            return;
+        }
+
+        hostelMessage.textContent = text;
+
+        hostelMessage.className =
+            "hostel-form-message " +
+            (type === "success"
+                ? "success-message"
+                : "error-message");
+
+    }
+
+
+    if (hostelForm) {
+
+        hostelForm.addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                showHostelMessage("", "");
+
+
+                // ------------------------------------------------
+                // COLLECT + MAP FIELDS TO BACKEND NAMES
+                // ------------------------------------------------
+                //
+                // Backend (updateStudentProfile) expects:
+                //   studentId, name, course, gender, year,
+                //   hostelPreference, housePincode, state
+                //
+                // Form field name -> backend field name:
+                //   fullName        -> name
+                //   homeLocation    -> state
+                //   pinCode         -> housePincode
+                //   academicYear    -> year
+                //   hostelPreference -> hostelPreference (same)
+                //   gender          -> gender (same)
+                //   course          -> course (same)
+                // ------------------------------------------------
+
+                const name =
+                    document.getElementById("fullName").value.trim();
+
+                const course =
+                    document.getElementById("course").value.trim();
+
+                const gender =
+                    document.getElementById("gender").value.trim();
+
+                const year =
+                    document.getElementById("academicYear").value.trim();
+
+                const hostelPreference =
+                    document.getElementById("hostelPreference").value.trim();
+
+                const housePincode =
+                    document.getElementById("pinCode").value.trim();
+
+                const state =
+                    document.getElementById("homeLocation").value.trim();
+
+
+                // ------------------------------------------------
+                // BASIC CLIENT-SIDE CHECKS
+                // (backend re-validates everything anyway)
+                // ------------------------------------------------
+
+                if (
+                    !name ||
+                    !course ||
+                    !gender ||
+                    !year ||
+                    !hostelPreference ||
+                    !housePincode ||
+                    !state
+                ) {
+
+                    showHostelMessage(
+                        "Please fill in all required fields."
+                    );
+
+                    return;
+
+                }
+
+                if (!/^\d{6}$/.test(housePincode)) {
+
+                    showHostelMessage(
+                        "PIN code must contain exactly 6 digits."
+                    );
+
+                    return;
+
+                }
+
+
+                // ------------------------------------------------
+                // LOADING STATE
+                // ------------------------------------------------
+
+                if (submitHostelBtn) {
+
+                    submitHostelBtn.disabled = true;
+
+                }
+
+
+                try {
+
+                    // ------------------------------------------------
+                    // SEND AS application/x-www-form-urlencoded
+                    // to avoid a CORS preflight (Apps Script has no
+                    // doOptions handler and cannot answer preflights).
+                    // ------------------------------------------------
+
+                    const body =
+                        new URLSearchParams();
+
+                    body.append("action", "updateStudentProfile");
+                    body.append("studentId", studentId);
+                    body.append("name", name);
+                    body.append("course", course);
+                    body.append("gender", gender);
+                    body.append("year", year);
+                    body.append("hostelPreference", hostelPreference);
+                    body.append("housePincode", housePincode);
+                    body.append("state", state);
+
+
+                    const response =
+                        await fetch(API_URL, {
+
+                            method: "POST",
+
+                            headers: {
+                                "Content-Type":
+                                    "application/x-www-form-urlencoded;charset=UTF-8"
+                            },
+
+                            body: body.toString()
+
+                        });
+
+
+                    if (!response.ok) {
+
+                        throw new Error(
+                            "Server returned HTTP " +
+                            response.status
+                        );
+
+                    }
+
+
+                    const result =
+                        await response.json();
+
+
+                    if (!result.success) {
+
+                        throw new Error(
+                            result.message ||
+                            "Failed to save your registration."
+                        );
+
+                    }
+
+
+                    // ------------------------------------------------
+                    // SUCCESS
+                    // ------------------------------------------------
+
+                    localStorage.setItem(
+                        "studentStatus",
+                        result.status || "Registered"
+                    );
+
+                    showHostelMessage(
+                        "Registration saved successfully.",
+                        "success"
+                    );
+
+
+                } catch (error) {
+
+                    console.error(
+                        "Profile update error:",
+                        error
+                    );
+
+                    showHostelMessage(
+                        error.message ||
+                        "Unable to save your registration. Please try again."
+                    );
+
+                } finally {
+
+                    if (submitHostelBtn) {
+
+                        submitHostelBtn.disabled = false;
+
+                    }
+
+                }
+
+            }
+        );
+
+    }
 
 });
