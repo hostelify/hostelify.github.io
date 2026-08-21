@@ -312,12 +312,91 @@
 
 
 
-                
+            <!-- ================================= -->
+            <!-- ALREADY SUBMITTED VIEW -->
+            <!-- Shown when the student has already   -->
+            <!-- completed their hostel registration.  -->
+            <!-- ================================= -->
+
+            <div
+                class="already-submitted-view hidden"
+                id="alreadySubmittedView"
+            >
+
+                <div class="submitted-icon-circle">
+
+                    <svg
+                        viewBox="0 0 24 24"
+                        aria-hidden="true"
+                    >
+
+                        <path d="M5 13l4 4L19 7" />
+
+                    </svg>
+
+                </div>
+
+                <h2 class="submitted-title">
+                    You've already submitted
+                </h2>
+
+                <p class="submitted-subtext">
+                    Your hostel registration has already been submitted successfully.
+                </p>
+
+                <p class="submitted-subtext-muted">
+                    You can edit your registration if you need to make any changes.
+                </p>
+
+                <div class="submitted-actions">
+
+                    <button
+                        type="button"
+                        id="editRegistrationBtn"
+                        class="btn-edit-registration"
+                    >
+
+                        <span>
+                            Edit Registration
+                        </span>
+
+                        <span>
+                            →
+                        </span>
+
+                    </button>
+
+                    <button
+                        type="button"
+                        id="withdrawRegistrationBtn"
+                        class="btn-withdraw-registration"
+                    >
+
+                        <span>
+                            Withdraw Registration
+                        </span>
+
+                    </button>
+
+                </div>
+
+                <p
+                    id="alreadySubmittedMessage"
+                    class="hostel-form-message"
+                ></p>
+
+            </div>
+
 
 
             <!-- ================================= -->
-            <!-- REGISTRATION FORM -->
+            <!-- REGISTRATION FORM VIEW -->
             <!-- ================================= -->
+
+            <div
+                id="registrationFormView"
+                class=""
+            >
 
             <form
                 id="hostelForm"
@@ -714,11 +793,47 @@
 
             </form>
 
+            </div>
+
 
         </section>
 
- 
 
+        <!-- ================================= -->
+        <!-- STATUS BAR: QUEUE NO. + ALLOCATION STATUS -->
+        <!-- ================================= -->
+
+        <div class="registration-status-bar" id="registrationStatusBar">
+
+            <div class="status-bar-group">
+
+                <span class="status-bar-label">
+                    Queue No.
+                </span>
+
+                <span class="queue-no-box" id="queueNoValue">
+                    —
+                </span>
+
+            </div>
+
+            <div class="status-bar-divider"></div>
+
+            <div class="status-bar-group">
+
+                <span class="status-bar-label">
+                    Allocation Status
+                </span>
+
+                <span class="status-dot pending" id="allocationStatusDot"></span>
+
+                <span class="status-bar-value pending" id="allocationStatusValue">
+                    Pending
+                </span>
+
+            </div>
+
+        </div>
 
 
     </main>
