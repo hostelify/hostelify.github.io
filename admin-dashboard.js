@@ -3,7 +3,7 @@
 // ============================================================
 
 const API_URL =
-  'https://script.google.com/macros/s/AKfycbwSLgrm424r3kD_WHk9rft4yPCMECa2ZaK6CaMSjL-HbpjVY8M6QqJDyA8kvEzO1g8l/exec';
+  'https://script.google.com/macros/s/AKfycbwSLgrm424r3kD_WHk9rft4yPCMECa2ZaK6CaMSjL-HbpjV8M6QqJDyA8kvEzO1g8l/exec';
 
 
 // ============================================================
@@ -286,7 +286,9 @@ async function loadStudents() {
       );
 
     allStudents =
-      data.students || [];
+      Array.isArray(data.students)
+        ? data.students
+        : [];
 
     applyFilter(
       searchInput.value
@@ -762,32 +764,175 @@ sidebarToggle.addEventListener(
 // ============================================================
 // ALLOCATION STATE
 // ============================================================
-
-/*
- * IMPORTANT:
- *
- * allocationStudents is ONLY frontend state.
- *
- * Dragging these rows NEVER changes the backend.
- * It NEVER changes Google Sheets.
- * It NEVER changes the actual allocation order.
- */
+//
+// IMPORTANT:
+//
+// allocationStudents = OFFICIAL BACKEND ORDER.
+//
+// visualAllocationStudents = temporary visual-only order.
+//
+// The visual order is NEVER sent to backend.
+// ============================================================
 
 let allocationStudents = [];
 
-
-// Visual-only order used by drag/drop.
-// This is NEVER sent to the backend.
-
 let visualAllocationStudents = [];
-
 
 let allocationEditMode =
   false;
 
-
-let draggedRowIndex =
+let draggedStudentId =
   null;
+
+
+// ============================================================
+// NORMALIZE BACKEND ALLOCATION DATA
+// ============================================================
+//
+// IMPORTANT:
+//
+// This function does NOT calculate priority.
+//
+// It only makes sure that the frontend receives the exact
+// backend field names in a consistent format.
+//
+// ============================================================
+
+function normalizeAllocationStudent(student) {
+
+  return {
+
+    priority:
+      Number(student.priority),
+
+    studentId:
+      student.studentId || '',
+
+    name:
+      student.name || '',
+
+    email:
+      student.email || '',
+
+    gender:
+      student.gender || '',
+
+    course:
+      student.course || '',
+
+    year:
+      student.year || '',
+
+    homeLocation:
+      student.homeLocation || '',
+
+    roomType:
+      student.roomType || '',
+
+    status:
+      student.status || '',
+
+    room:
+      student.room || ''
+
+  };
+
+}
+
+
+// ============================================================
+// SORT BY OFFICIAL BACKEND PRIORITY
+// ============================================================
+//
+// VERY IMPORTANT:
+//
+// This is NOT a new priority calculation.
+//
+// The frontend does NOT calculate NCR distance,
+// Outside NCR score, hostel preference, etc.
+//
+// It ONLY sorts using the priority number already
+// calculated by the backend.
+//
+// Backend:
+//     priority = 1
+//     priority = 2
+//     priority = 3
+//
+// Frontend:
+//     1 → 2 → 3
+//
+// ============================================================
+
+function sortByBackendPriority(students) {
+
+  return students
+    .slice()
+    .sort(function(a, b) {
+
+      const priorityA =
+        Number(a.priority);
+
+      const priorityB =
+        Number(b.priority);
+
+
+      // Valid backend priorities come first.
+
+      const validA =
+        Number.isFinite(priorityA);
+
+      const validB =
+        Number.isFinite(priorityB);
+
+
+      if (
+        validA &&
+        validB
+      ) {
+
+        return (
+          priorityA -
+          priorityB
+        );
+
+      }
+
+
+      if (
+        validA &&
+        !validB
+      ) {
+
+        return -1;
+
+      }
+
+
+      if (
+        !validA &&
+        validB
+      ) {
+
+        return 1;
+
+      }
+
+
+      // Should practically never happen because the backend
+      // always supplies priority.
+
+      return String(
+        a.studentId || ''
+      ).localeCompare(
+        String(
+          b.studentId || ''
+        )
+      );
+
+    });
+
+}
 
 
 // ============================================================
@@ -819,16 +964,18 @@ async function loadAllocation() {
   try {
 
     /*
-     * IMPORTANT:
+     * ONLY the backend calculates priority.
      *
-     * The backend calculates the official
-     * priority using:
+     * The frontend does not know or care whether the backend
+     * used:
      *
-     * calculateStudentPriority()
-     *          ↓
-     * sortStudentsForAllocation()
+     * - NCR
+     * - Outside NCR
+     * - distance
+     * - 1000000
+     * - any future priority rule
      *
-     * The frontend does NOT calculate priority.
+     * It simply receives the official result.
      */
 
     const data =
@@ -841,23 +988,50 @@ async function loadAllocation() {
       );
 
 
+    if (
+      !Array.isArray(
+        data.students
+      )
+    ) {
+
+      throw new Error(
+        'Backend returned an invalid allocation priority list.'
+      );
+
+    }
+
+
     /*
-     * IMPORTANT:
+     * Normalize ONLY field names/types.
      *
-     * This is a COPY of the backend result.
+     * No priority calculation happens here.
+     */
+
+    const backendStudents =
+      data.students.map(
+        normalizeAllocationStudent
+      );
+
+
+    /*
+     * CRITICAL:
      *
-     * It is only used for display.
+     * Sort using ONLY the priority number generated by
+     * the backend.
      *
-     * It is NEVER sent to runAllocation().
+     * This protects the display even if the API response
+     * arrives in an unexpected order.
      */
 
     allocationStudents =
-      Array.isArray(
-        data.students
-      )
-        ? data.students.slice()
-        : [];
+      sortByBackendPriority(
+        backendStudents
+      );
 
+
+    /*
+     * Visual array starts from the official backend order.
+     */
 
     visualAllocationStudents =
       allocationStudents.slice();
@@ -929,23 +1103,19 @@ function renderAllocationRows(
     students.map(
       function(s, index) {
 
+
         /*
          * NORMAL MODE:
          *
-         * Show the official backend priority.
+         * ALWAYS show the official backend priority.
          *
-         * EDIT MODE:
-         *
-         * Show temporary visual position.
+         * Never replace it with frontend index.
          */
 
         const displayedPriority =
           allocationEditMode
             ? index + 1
-            : (
-                s.priority ||
-                index + 1
-              );
+            : s.priority;
 
 
         return (
@@ -956,8 +1126,10 @@ function renderAllocationRows(
               allocationEditMode +
             '" ' +
 
-            'data-index="' +
-              index +
+            'data-student-id="' +
+              escapeHtml(
+                s.studentId
+              ) +
             '">' +
 
 
@@ -968,7 +1140,9 @@ function renderAllocationRows(
               '</span>' +
 
               '<span class="priority-number">' +
-                displayedPriority +
+                escapeHtml(
+                  displayedPriority
+                ) +
               '</span>' +
 
             '</td>' +
@@ -1102,10 +1276,8 @@ function attachDragEvents() {
           ) return;
 
 
-          draggedRowIndex =
-            Number(
-              row.dataset.index
-            );
+          draggedStudentId =
+            row.dataset.studentId;
 
 
           row.classList.add(
@@ -1140,7 +1312,7 @@ function attachDragEvents() {
             );
 
 
-          draggedRowIndex =
+          draggedStudentId =
             null;
 
         }
@@ -1196,18 +1368,59 @@ function attachDragEvents() {
           );
 
 
-          const targetIndex =
-            Number(
-              row.dataset.index
+          const targetStudentId =
+            row.dataset.studentId;
+
+
+          if (
+            !draggedStudentId ||
+            !targetStudentId ||
+            draggedStudentId ===
+              targetStudentId
+          ) {
+
+            return;
+
+          }
+
+
+          const fromIndex =
+            visualAllocationStudents.findIndex(
+              function(student) {
+
+                return (
+                  String(
+                    student.studentId
+                  ) ===
+                  String(
+                    draggedStudentId
+                  )
+                );
+
+              }
+            );
+
+
+          const toIndex =
+            visualAllocationStudents.findIndex(
+              function(student) {
+
+                return (
+                  String(
+                    student.studentId
+                  ) ===
+                  String(
+                    targetStudentId
+                  )
+                );
+
+              }
             );
 
 
           if (
-            draggedRowIndex ===
-              null ||
-
-            draggedRowIndex ===
-              targetIndex
+            fromIndex === -1 ||
+            toIndex === -1
           ) {
 
             return;
@@ -1217,25 +1430,24 @@ function attachDragEvents() {
 
           const movedStudent =
             visualAllocationStudents.splice(
-              draggedRowIndex,
+              fromIndex,
               1
             )[0];
 
 
           visualAllocationStudents.splice(
-            targetIndex,
+            toIndex,
             0,
             movedStudent
           );
 
 
           /*
-           * ONLY THE VISUAL ARRAY IS MODIFIED.
+           * ONLY visualAllocationStudents changes.
            *
-           * allocationStudents remains in
-           * official backend order.
+           * allocationStudents remains untouched.
            *
-           * NO API CALL IS MADE.
+           * Backend priority remains untouched.
            */
 
           renderAllocationRows(
@@ -1259,11 +1471,8 @@ function attachDragEvents() {
 //
 // This does NOT save priority.
 //
-// It only enables visual drag mode.
-//
-// "Save Priority" means:
-// discard the visual arrangement and
-// reload the official backend order.
+// "Save Priority" simply exits visual editing and restores
+// the official backend order.
 //
 // ============================================================
 
@@ -1309,9 +1518,6 @@ document
       // --------------------------------------------------------
       // EXIT VISUAL EDIT MODE
       // --------------------------------------------------------
-      //
-      // Nothing is saved.
-      // --------------------------------------------------------
 
       allocationEditMode =
         false;
@@ -1321,11 +1527,19 @@ document
         'Edit Priority';
 
 
-      // --------------------------------------------------------
-      // DISCARD VISUAL ORDER
-      // --------------------------------------------------------
+      /*
+       * Discard ALL visual changes.
+       *
+       * Restore official backend order.
+       */
 
-      await loadAllocation();
+      visualAllocationStudents =
+        allocationStudents.slice();
+
+
+      renderAllocationRows(
+        allocationStudents
+      );
 
     }
   );
@@ -1349,24 +1563,21 @@ document
           .toLowerCase();
 
 
-      if (!query) {
-
-        renderAllocationRows(
-          allocationEditMode
-            ? visualAllocationStudents
-            : allocationStudents
-        );
-
-
-        return;
-
-      }
-
-
       const sourceStudents =
         allocationEditMode
           ? visualAllocationStudents
           : allocationStudents;
+
+
+      if (!query) {
+
+        renderAllocationRows(
+          sourceStudents
+        );
+
+        return;
+
+      }
 
 
       const filtered =
@@ -1424,8 +1635,8 @@ document
     function() {
 
       /*
-       * Refresh ALWAYS requests
-       * fresh priority from backend.
+       * Refresh ALWAYS gets a fresh official priority
+       * calculation from the backend.
        */
 
       loadAllocation();
@@ -1438,22 +1649,23 @@ document
 // ALLOCATE ALL
 // ============================================================
 //
-// THIS IS THE CRITICAL PART.
+// CRITICAL:
 //
-// The frontend DOES NOT send:
-//
-// - allocationStudents
-// - visualAllocationStudents
-// - priority
-// - dragged order
-// - row indexes
-//
-// It sends ONLY:
+// The frontend sends ONLY:
 //
 // - batchId
 // - adminKey
 //
-// The backend then independently executes:
+// It NEVER sends:
+//
+// - priority
+// - student order
+// - dragged order
+// - row index
+// - allocationStudents
+// - visualAllocationStudents
+//
+// Backend independently performs:
 //
 // getStudentsByBatch()
 //        ↓
@@ -1477,10 +1689,6 @@ document
 
       if (!session) return;
 
-
-      // --------------------------------------------------------
-      // DO NOT ALLOCATE WHILE VISUAL EDIT MODE IS ACTIVE
-      // --------------------------------------------------------
 
       if (
         allocationEditMode
@@ -1514,13 +1722,9 @@ document
 
       try {
 
+
         // ------------------------------------------------------
-        // GET CURRENT BATCH ID
-        // ------------------------------------------------------
-        //
-        // This call only retrieves the current backend batch.
-        //
-        // It does NOT submit frontend priority.
+        // GET CURRENT BATCH FROM BACKEND
         // ------------------------------------------------------
 
         const priorityData =
@@ -1551,9 +1755,9 @@ document
         // ACTUAL ALLOCATION
         // ------------------------------------------------------
         //
-        // ONLY batchId + adminKey are sent.
+        // Frontend priority/order is NOT sent.
         //
-        // The backend MUST calculate priority itself.
+        // Backend recalculates everything itself.
         // ------------------------------------------------------
 
         const data =
@@ -1590,10 +1794,6 @@ document
           )
         );
 
-
-        // ------------------------------------------------------
-        // REFRESH BOTH TABLES
-        // ------------------------------------------------------
 
         await loadStudents();
 
@@ -1640,9 +1840,7 @@ document.addEventListener(
 );
 
 
-// In case DOMContentLoaded has
-// already fired before this script
-// finishes loading.
+// In case DOMContentLoaded has already fired.
 
 if (
   document.readyState !==
