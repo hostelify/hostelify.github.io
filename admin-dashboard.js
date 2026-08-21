@@ -775,8 +775,16 @@ sidebarToggle.addEventListener(
 
 let allocationStudents = [];
 
+
+// Visual-only order used by drag/drop.
+// This is NEVER sent to the backend.
+
+let visualAllocationStudents = [];
+
+
 let allocationEditMode =
   false;
+
 
 let draggedRowIndex =
   null;
@@ -813,15 +821,14 @@ async function loadAllocation() {
     /*
      * IMPORTANT:
      *
-     * This is NOT getAllStudents.
-     *
-     * The backend will run its own:
+     * The backend calculates the official
+     * priority using:
      *
      * calculateStudentPriority()
-     *        ↓
+     *          ↓
      * sortStudentsForAllocation()
      *
-     * and return the official order.
+     * The frontend does NOT calculate priority.
      */
 
     const data =
@@ -834,14 +841,27 @@ async function loadAllocation() {
       );
 
 
-    allocationStudents =
-      data.students || [];
-
-
     /*
-     * Always leave edit mode when
-     * loading/refreshing official data.
+     * IMPORTANT:
+     *
+     * This is a COPY of the backend result.
+     *
+     * It is only used for display.
+     *
+     * It is NEVER sent to runAllocation().
      */
+
+    allocationStudents =
+      Array.isArray(
+        data.students
+      )
+        ? data.students.slice()
+        : [];
+
+
+    visualAllocationStudents =
+      allocationStudents.slice();
+
 
     allocationEditMode =
       false;
@@ -910,11 +930,13 @@ function renderAllocationRows(
       function(s, index) {
 
         /*
-         * In normal mode:
-         * show the backend priority.
+         * NORMAL MODE:
          *
-         * In edit mode:
-         * show the temporary visual position.
+         * Show the official backend priority.
+         *
+         * EDIT MODE:
+         *
+         * Show temporary visual position.
          */
 
         const displayedPriority =
@@ -1049,12 +1071,14 @@ function renderAllocationRows(
 // DRAG & DROP
 // ============================================================
 //
-// THIS IS PURELY VISUAL.
+// STRICTLY VISUAL.
 //
-// It only changes allocationStudents in JavaScript.
-// Nothing is sent to Apps Script.
-// Nothing is written to Google Sheets.
-// runAllocation() does not use this order.
+// The dragged order:
+// - is NOT sent to backend
+// - is NOT saved
+// - is NOT written to Sheets
+// - is NOT used by runAllocation()
+//
 // ============================================================
 
 function attachDragEvents() {
@@ -1077,10 +1101,12 @@ function attachDragEvents() {
             !allocationEditMode
           ) return;
 
+
           draggedRowIndex =
             Number(
               row.dataset.index
             );
+
 
           row.classList.add(
             'dragging'
@@ -1098,6 +1124,7 @@ function attachDragEvents() {
             'dragging'
           );
 
+
           document
             .querySelectorAll(
               '.drag-over'
@@ -1111,6 +1138,7 @@ function attachDragEvents() {
 
               }
             );
+
 
           draggedRowIndex =
             null;
@@ -1127,7 +1155,9 @@ function attachDragEvents() {
             !allocationEditMode
           ) return;
 
+
           e.preventDefault();
+
 
           row.classList.add(
             'drag-over'
@@ -1157,7 +1187,9 @@ function attachDragEvents() {
             !allocationEditMode
           ) return;
 
+
           e.preventDefault();
+
 
           row.classList.remove(
             'drag-over'
@@ -1184,13 +1216,13 @@ function attachDragEvents() {
 
 
           const movedStudent =
-            allocationStudents.splice(
+            visualAllocationStudents.splice(
               draggedRowIndex,
               1
             )[0];
 
 
-          allocationStudents.splice(
+          visualAllocationStudents.splice(
             targetIndex,
             0,
             movedStudent
@@ -1198,13 +1230,16 @@ function attachDragEvents() {
 
 
           /*
-           * Re-render only the visual list.
+           * ONLY THE VISUAL ARRAY IS MODIFIED.
            *
-           * NO API CALL.
+           * allocationStudents remains in
+           * official backend order.
+           *
+           * NO API CALL IS MADE.
            */
 
           renderAllocationRows(
-            allocationStudents
+            visualAllocationStudents
           );
 
         }
@@ -1222,11 +1257,14 @@ function attachDragEvents() {
 //
 // IMPORTANT:
 //
-// "Save Priority" here does NOT save anything.
-// It simply exits visual edit mode.
+// This does NOT save priority.
 //
-// When edit mode ends, the official backend
-// priority is loaded again.
+// It only enables visual drag mode.
+//
+// "Save Priority" means:
+// discard the visual arrangement and
+// reload the official backend order.
+//
 // ============================================================
 
 document
@@ -1238,9 +1276,9 @@ document
     async function() {
 
 
-      /*
-       * ENTER VISUAL EDIT MODE
-       */
+      // --------------------------------------------------------
+      // ENTER VISUAL EDIT MODE
+      // --------------------------------------------------------
 
       if (
         !allocationEditMode
@@ -1249,36 +1287,43 @@ document
         allocationEditMode =
           true;
 
+
+        visualAllocationStudents =
+          allocationStudents.slice();
+
+
         this.textContent =
           'Save Priority';
 
+
         renderAllocationRows(
-          allocationStudents
+          visualAllocationStudents
         );
+
 
         return;
 
       }
 
 
-      /*
-       * EXIT VISUAL EDIT MODE
-       *
-       * Nothing is saved.
-       */
+      // --------------------------------------------------------
+      // EXIT VISUAL EDIT MODE
+      // --------------------------------------------------------
+      //
+      // Nothing is saved.
+      // --------------------------------------------------------
 
       allocationEditMode =
         false;
+
 
       this.textContent =
         'Edit Priority';
 
 
-      /*
-       * Reload the OFFICIAL backend
-       * priority so the visual drag
-       * is completely discarded.
-       */
+      // --------------------------------------------------------
+      // DISCARD VISUAL ORDER
+      // --------------------------------------------------------
 
       await loadAllocation();
 
@@ -1307,16 +1352,25 @@ document
       if (!query) {
 
         renderAllocationRows(
-          allocationStudents
+          allocationEditMode
+            ? visualAllocationStudents
+            : allocationStudents
         );
+
 
         return;
 
       }
 
 
+      const sourceStudents =
+        allocationEditMode
+          ? visualAllocationStudents
+          : allocationStudents;
+
+
       const filtered =
-        allocationStudents.filter(
+        sourceStudents.filter(
           function(s) {
 
             return (
@@ -1370,8 +1424,8 @@ document
     function() {
 
       /*
-       * Refresh always gets the official
-       * backend priority again.
+       * Refresh ALWAYS requests
+       * fresh priority from backend.
        */
 
       loadAllocation();
@@ -1384,15 +1438,29 @@ document
 // ALLOCATE ALL
 // ============================================================
 //
-// IMPORTANT:
+// THIS IS THE CRITICAL PART.
 //
-// We DO NOT send allocationStudents.
+// The frontend DOES NOT send:
 //
-// The backend calculates priority again
-// using sortStudentsForAllocation().
+// - allocationStudents
+// - visualAllocationStudents
+// - priority
+// - dragged order
+// - row indexes
 //
-// Therefore dragging in the dashboard
-// can NEVER affect actual allocation.
+// It sends ONLY:
+//
+// - batchId
+// - adminKey
+//
+// The backend then independently executes:
+//
+// getStudentsByBatch()
+//        ↓
+// sortStudentsForAllocation()
+//        ↓
+// actual allocation
+//
 // ============================================================
 
 document
@@ -1410,10 +1478,9 @@ document
       if (!session) return;
 
 
-      /*
-       * Don't allocate while the admin
-       * is visually dragging rows.
-       */
+      // --------------------------------------------------------
+      // DO NOT ALLOCATE WHILE VISUAL EDIT MODE IS ACTIVE
+      // --------------------------------------------------------
 
       if (
         allocationEditMode
@@ -1440,30 +1507,21 @@ document
       this.disabled =
         true;
 
+
       this.textContent =
         'Allocating…';
 
 
       try {
 
-        /*
-         * IMPORTANT:
-         *
-         * We only send batchId + adminKey.
-         *
-         * NO priority array is sent.
-         *
-         * The backend independently runs:
-         *
-         * sortStudentsForAllocation()
-         */
-
-        let batchId = '';
-
-        /*
-         * getAllocationPriority() returns
-         * the current batch ID.
-         */
+        // ------------------------------------------------------
+        // GET CURRENT BATCH ID
+        // ------------------------------------------------------
+        //
+        // This call only retrieves the current backend batch.
+        //
+        // It does NOT submit frontend priority.
+        // ------------------------------------------------------
 
         const priorityData =
           await callApi(
@@ -1475,8 +1533,9 @@ document
           );
 
 
-        batchId =
-          priorityData.batchId || '';
+        const batchId =
+          priorityData.batchId ||
+          '';
 
 
         if (!batchId) {
@@ -1487,6 +1546,15 @@ document
 
         }
 
+
+        // ------------------------------------------------------
+        // ACTUAL ALLOCATION
+        // ------------------------------------------------------
+        //
+        // ONLY batchId + adminKey are sent.
+        //
+        // The backend MUST calculate priority itself.
+        // ------------------------------------------------------
 
         const data =
           await callApi(
@@ -1523,9 +1591,9 @@ document
         );
 
 
-        /*
-         * Reload official data.
-         */
+        // ------------------------------------------------------
+        // REFRESH BOTH TABLES
+        // ------------------------------------------------------
 
         await loadStudents();
 
@@ -1535,6 +1603,7 @@ document
       } catch (err) {
 
         console.error(err);
+
 
         alert(
           err.message ||
@@ -1546,6 +1615,7 @@ document
 
         this.disabled =
           false;
+
 
         this.textContent =
           'Allocate All';
