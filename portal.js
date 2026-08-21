@@ -379,6 +379,14 @@ document.addEventListener("DOMContentLoaded", function () {
     const submitHostelBtn =
         document.getElementById("submitHostelBtn");
 
+    // adding registration button .....:
+        const submitHostelBtn =
+            document.getElementById("submitHostelBtn");
+        
+        const submitHostelBtnText =
+            submitHostelBtn ? submitHostelBtn.querySelector("span") : null;
+            
+
 
     function showHostelMessage(text, type) {
 
@@ -482,16 +490,21 @@ document.addEventListener("DOMContentLoaded", function () {
                 }
 
 
-                // ------------------------------------------------
-                // LOADING STATE
-                // ------------------------------------------------
+               // ------------------------------------------------
+// LOADING STATE
+// ------------------------------------------------
 
-                if (submitHostelBtn) {
+if (submitHostelBtn) {
 
-                    submitHostelBtn.disabled = true;
+    submitHostelBtn.disabled = true;
 
-                }
+}
 
+if (submitHostelBtnText) {
+
+    submitHostelBtnText.textContent = "Registering...";
+
+}
 
                 try {
 
@@ -581,13 +594,21 @@ document.addEventListener("DOMContentLoaded", function () {
                         "Unable to save your registration. Please try again."
                     );
 
-                } finally {
+} finally {
 
-                    if (submitHostelBtn) {
+    if (submitHostelBtn) {
 
-                        submitHostelBtn.disabled = false;
+        submitHostelBtn.disabled = false;
 
-                    }
+    }
+
+    if (submitHostelBtnText) {
+
+        submitHostelBtnText.textContent = "Save Registration";
+
+    }
+
+}
 
                 }
 
