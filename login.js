@@ -311,7 +311,7 @@ if (loginForm) {
                 // ------------------------------------------------
 
                 const response =
-                    await fetch(API_URL, {
+                    await fetch(API_URL,) {
 
                         method: "POST",
 
