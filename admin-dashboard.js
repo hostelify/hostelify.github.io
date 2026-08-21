@@ -1,4 +1,19 @@
 // ============================================================
+// ADMIN DASHBOARD
+// ============================================================
+// IMPORTANT:
+// The backend is the ONLY source of truth for allocation priority.
+//
+// Frontend responsibilities:
+// - request official priority list from backend
+// - display the exact order returned by backend
+// - allow temporary visual drag/reorder only in Edit Priority mode
+// - NEVER calculate priority
+// - NEVER send visual order/priority to runAllocation()
+// ============================================================
+
+
+// ============================================================
 // CONFIG
 // ============================================================
 
@@ -19,28 +34,37 @@ async function callApi(action, params = {}) {
     });
 
   const response =
-    await fetch(API_URL, {
-      method: 'POST',
-      body: body
-    });
+    await fetch(
+      API_URL,
+      {
+        method: 'POST',
+        body: body
+      }
+    );
 
   if (!response.ok) {
+
     throw new Error(
-      'Network error: ' + response.status
+      'Network error: ' +
+      response.status
     );
+
   }
 
   const data =
     await response.json();
 
   if (!data.success) {
+
     throw new Error(
       data.message ||
       'Request failed.'
     );
+
   }
 
   return data;
+
 }
 
 
@@ -51,6 +75,7 @@ async function callApi(action, params = {}) {
 function getAdminSession() {
 
   return {
+
     username:
       sessionStorage.getItem(
         'adminUsername'
@@ -60,6 +85,7 @@ function getAdminSession() {
       sessionStorage.getItem(
         'adminKey'
       )
+
   };
 
 }
@@ -90,15 +116,18 @@ function requireAdminSession() {
 
 let allStudents = [];
 
+
 const tableBody =
   document.getElementById(
     'tableBody'
   );
 
+
 const searchInput =
   document.querySelector(
     '.search-input'
   );
+
 
 const refreshBtn =
   document.getElementById(
@@ -147,88 +176,90 @@ function renderRows(students) {
   }
 
   tableBody.innerHTML =
-    students.map(function(s) {
+    students.map(
+      function(s) {
 
-      return (
+        return (
 
-        '<tr>' +
+          '<tr>' +
 
-          '<td>' +
-            escapeHtml(
-              s.studentId
-            ) +
-          '</td>' +
-
-          '<td>' +
-            escapeHtml(
-              s.name
-            ) +
-          '</td>' +
-
-          '<td>' +
-            escapeHtml(
-              s.gender
-            ) +
-          '</td>' +
-
-          '<td>' +
-            escapeHtml(
-              s.course
-            ) +
-          '</td>' +
-
-          '<td>' +
-            escapeHtml(
-              s.year
-            ) +
-          '</td>' +
-
-          '<td>' +
-            escapeHtml(
-              s.homeLocation
-            ) +
-          '</td>' +
-
-          '<td>' +
-            escapeHtml(
-              s.roomType
-            ) +
-          '</td>' +
-
-          '<td>' +
-
-            '<span class="status-badge status-' +
-
+            '<td>' +
               escapeHtml(
-                (s.status || '')
-                  .toLowerCase()
-                  .replace(
-                    /\s+/g,
-                    '-'
-                  )
+                s.studentId
               ) +
+            '</td>' +
 
-            '">' +
-
+            '<td>' +
               escapeHtml(
-                s.status
+                s.name
               ) +
+            '</td>' +
 
-            '</span>' +
+            '<td>' +
+              escapeHtml(
+                s.gender
+              ) +
+            '</td>' +
 
-          '</td>' +
+            '<td>' +
+              escapeHtml(
+                s.course
+              ) +
+            '</td>' +
 
-          '<td>' +
-            escapeHtml(
-              s.room
-            ) +
-          '</td>' +
+            '<td>' +
+              escapeHtml(
+                s.year
+              ) +
+            '</td>' +
 
-        '</tr>'
+            '<td>' +
+              escapeHtml(
+                s.homeLocation
+              ) +
+            '</td>' +
 
-      );
+            '<td>' +
+              escapeHtml(
+                s.roomType
+              ) +
+            '</td>' +
 
-    }).join('');
+            '<td>' +
+
+              '<span class="status-badge status-' +
+
+                escapeHtml(
+                  (s.status || '')
+                    .toLowerCase()
+                    .replace(
+                      /\s+/g,
+                      '-'
+                    )
+                ) +
+
+              '">' +
+
+                escapeHtml(
+                  s.status
+                ) +
+
+              '</span>' +
+
+            '</td>' +
+
+            '<td>' +
+              escapeHtml(
+                s.room
+              ) +
+            '</td>' +
+
+          '</tr>'
+
+        );
+
+      }
+    ).join('');
 
 }
 
@@ -254,7 +285,9 @@ function showErrorRow(message) {
   tableBody.innerHTML =
     '<tr class="error-row">' +
       '<td colspan="9">' +
-        escapeHtml(message) +
+        escapeHtml(
+          message
+        ) +
       '</td>' +
     '</tr>';
 
@@ -286,12 +319,16 @@ async function loadStudents() {
       );
 
     allStudents =
-      Array.isArray(data.students)
+      Array.isArray(
+        data.students
+      )
         ? data.students
         : [];
 
     applyFilter(
-      searchInput.value
+      searchInput
+        ? searchInput.value
+        : ''
     );
 
   } catch (err) {
@@ -315,7 +352,9 @@ async function loadStudents() {
 function applyFilter(query) {
 
   const q =
-    query
+    String(
+      query || ''
+    )
       .trim()
       .toLowerCase();
 
@@ -373,22 +412,30 @@ function applyFilter(query) {
 // STUDENT EVENTS
 // ============================================================
 
-refreshBtn.addEventListener(
-  'click',
-  loadStudents
-);
+if (refreshBtn) {
+
+  refreshBtn.addEventListener(
+    'click',
+    loadStudents
+  );
+
+}
 
 
-searchInput.addEventListener(
-  'input',
-  function() {
+if (searchInput) {
 
-    applyFilter(
-      searchInput.value
-    );
+  searchInput.addEventListener(
+    'input',
+    function() {
 
-  }
-);
+      applyFilter(
+        searchInput.value
+      );
+
+    }
+  );
+
+}
 
 
 // ============================================================
@@ -398,13 +445,16 @@ searchInput.addEventListener(
 const THEME_KEY =
   'admin-dashboard-theme';
 
+
 const root =
   document.documentElement;
+
 
 const themeBtn =
   document.getElementById(
     'themeBtn'
   );
+
 
 const themeIcon =
   document.getElementById(
@@ -440,17 +490,25 @@ function applyTheme(theme) {
     theme
   );
 
-  themeIcon.innerHTML =
-    theme === 'dark'
-      ? moonIcon
-      : sunIcon;
+  if (themeIcon) {
 
-  themeBtn.setAttribute(
-    'aria-label',
-    theme === 'dark'
-      ? 'Switch to light theme'
-      : 'Switch to dark theme'
-  );
+    themeIcon.innerHTML =
+      theme === 'dark'
+        ? moonIcon
+        : sunIcon;
+
+  }
+
+  if (themeBtn) {
+
+    themeBtn.setAttribute(
+      'aria-label',
+      theme === 'dark'
+        ? 'Switch to light theme'
+        : 'Switch to dark theme'
+    );
+
+  }
 
   localStorage.setItem(
     THEME_KEY,
@@ -464,6 +522,7 @@ const savedTheme =
   localStorage.getItem(
     THEME_KEY
   );
+
 
 const systemPrefersLight =
   window.matchMedia(
@@ -481,23 +540,27 @@ applyTheme(
 );
 
 
-themeBtn.addEventListener(
-  'click',
-  function() {
+if (themeBtn) {
 
-    const current =
-      root.getAttribute(
-        'data-theme'
+  themeBtn.addEventListener(
+    'click',
+    function() {
+
+      const current =
+        root.getAttribute(
+          'data-theme'
+        );
+
+      applyTheme(
+        current === 'dark'
+          ? 'light'
+          : 'dark'
       );
 
-    applyTheme(
-      current === 'dark'
-        ? 'light'
-        : 'dark'
-    );
+    }
+  );
 
-  }
-);
+}
 
 
 // ============================================================
@@ -509,6 +572,7 @@ const accountBtn =
     'accountBtn'
   );
 
+
 const accountDropdown =
   document.getElementById(
     'accountDropdown'
@@ -517,49 +581,66 @@ const accountDropdown =
 
 function closeDropdown() {
 
+  if (!accountDropdown) return;
+
   accountDropdown.classList.remove(
     'open'
   );
 
-  accountBtn.setAttribute(
-    'aria-expanded',
-    'false'
-  );
+  if (accountBtn) {
+
+    accountBtn.setAttribute(
+      'aria-expanded',
+      'false'
+    );
+
+  }
 
 }
 
 
 function openDropdown() {
 
+  if (!accountDropdown) return;
+
   accountDropdown.classList.add(
     'open'
   );
 
-  accountBtn.setAttribute(
-    'aria-expanded',
-    'true'
-  );
+  if (accountBtn) {
+
+    accountBtn.setAttribute(
+      'aria-expanded',
+      'true'
+    );
+
+  }
 
 }
 
 
-accountBtn.addEventListener(
-  'click',
-  function(e) {
+if (accountBtn) {
 
-    e.stopPropagation();
+  accountBtn.addEventListener(
+    'click',
+    function(e) {
 
-    const isOpen =
-      accountDropdown.classList.contains(
-        'open'
-      );
+      e.stopPropagation();
 
-    isOpen
-      ? closeDropdown()
-      : openDropdown();
+      const isOpen =
+        accountDropdown &&
+        accountDropdown.classList.contains(
+          'open'
+        );
 
-  }
-);
+      isOpen
+        ? closeDropdown()
+        : openDropdown();
+
+    }
+  );
+
+}
 
 
 document.addEventListener(
@@ -567,6 +648,7 @@ document.addEventListener(
   function(e) {
 
     if (
+      accountDropdown &&
       !accountDropdown.contains(
         e.target
       ) &&
@@ -595,11 +677,15 @@ document.addEventListener(
 );
 
 
-document
-  .getElementById(
+const logoutBtn =
+  document.getElementById(
     'logoutBtn'
-  )
-  .addEventListener(
+  );
+
+
+if (logoutBtn) {
+
+  logoutBtn.addEventListener(
     'click',
     function() {
 
@@ -617,6 +703,8 @@ document
     }
   );
 
+}
+
 
 // ============================================================
 // ADMIN ID
@@ -624,9 +712,14 @@ document
 
 function setAdminId(id) {
 
-  document.getElementById(
-    'accountId'
-  ).textContent =
+  const accountId =
+    document.getElementById(
+      'accountId'
+    );
+
+  if (!accountId) return;
+
+  accountId.textContent =
     id
       ? `ID: ${id}`
       : 'ID: —';
@@ -635,7 +728,6 @@ function setAdminId(id) {
 
 
 {
-
   const session =
     getAdminSession();
 
@@ -659,20 +751,24 @@ const sidebar =
     'sidebar'
   );
 
+
 const sidebarToggle =
   document.getElementById(
     'sidebarToggle'
   );
+
 
 const sidebarItems =
   document.querySelectorAll(
     '.sidebar-item'
   );
 
+
 const studentsSection =
   document.getElementById(
     'studentsSection'
   );
+
 
 const allocationSection =
   document.getElementById(
@@ -697,20 +793,29 @@ function switchSection(
   );
 
 
-  studentsSection.classList.toggle(
-    'active',
-    section === 'students'
-  );
+  if (studentsSection) {
+
+    studentsSection.classList.toggle(
+      'active',
+      section === 'students'
+    );
+
+  }
 
 
-  allocationSection.classList.toggle(
-    'active',
-    section === 'allocation'
-  );
+  if (allocationSection) {
+
+    allocationSection.classList.toggle(
+      'active',
+      section === 'allocation'
+    );
+
+  }
 
 
   if (
-    window.innerWidth <= 1100
+    window.innerWidth <= 1100 &&
+    sidebar
   ) {
 
     sidebar.classList.remove(
@@ -749,29 +854,33 @@ sidebarItems.forEach(
 );
 
 
-sidebarToggle.addEventListener(
-  'click',
-  function() {
+if (sidebarToggle && sidebar) {
 
-    sidebar.classList.toggle(
-      'open'
-    );
+  sidebarToggle.addEventListener(
+    'click',
+    function() {
 
-  }
-);
+      sidebar.classList.toggle(
+        'open'
+      );
+
+    }
+  );
+
+}
 
 
 // ============================================================
 // ALLOCATION STATE
 // ============================================================
 //
-// IMPORTANT:
+// allocationStudents:
+//     EXACT ORDER returned by backend.
 //
-// allocationStudents = OFFICIAL BACKEND ORDER.
+// visualAllocationStudents:
+//     temporary UI-only order while editing.
 //
-// visualAllocationStudents = temporary visual-only order.
-//
-// The visual order is NEVER sent to backend.
+// The backend remains the source of truth.
 // ============================================================
 
 let allocationStudents = [];
@@ -790,20 +899,27 @@ let draggedStudentId =
 // ============================================================
 //
 // IMPORTANT:
+// No priority calculation happens here.
 //
-// This function does NOT calculate priority.
+// The backend already:
+// 1. reads the current batch
+// 2. calculates priority
+// 3. sorts students
+// 4. assigns priority numbers
 //
-// It only makes sure that the frontend receives the exact
-// backend field names in a consistent format.
-//
+// Frontend only copies the response.
 // ============================================================
 
-function normalizeAllocationStudent(student) {
+function normalizeAllocationStudent(
+  student
+) {
 
   return {
 
     priority:
-      Number(student.priority),
+      Number(
+        student.priority
+      ),
 
     studentId:
       student.studentId || '',
@@ -841,102 +957,20 @@ function normalizeAllocationStudent(student) {
 
 
 // ============================================================
-// SORT BY OFFICIAL BACKEND PRIORITY
-// ============================================================
-//
-// VERY IMPORTANT:
-//
-// This is NOT a new priority calculation.
-//
-// The frontend does NOT calculate NCR distance,
-// Outside NCR score, hostel preference, etc.
-//
-// It ONLY sorts using the priority number already
-// calculated by the backend.
-//
-// Backend:
-//     priority = 1
-//     priority = 2
-//     priority = 3
-//
-// Frontend:
-//     1 → 2 → 3
-//
-// ============================================================
-
-function sortByBackendPriority(students) {
-
-  return students
-    .slice()
-    .sort(function(a, b) {
-
-      const priorityA =
-        Number(a.priority);
-
-      const priorityB =
-        Number(b.priority);
-
-
-      // Valid backend priorities come first.
-
-      const validA =
-        Number.isFinite(priorityA);
-
-      const validB =
-        Number.isFinite(priorityB);
-
-
-      if (
-        validA &&
-        validB
-      ) {
-
-        return (
-          priorityA -
-          priorityB
-        );
-
-      }
-
-
-      if (
-        validA &&
-        !validB
-      ) {
-
-        return -1;
-
-      }
-
-
-      if (
-        !validA &&
-        validB
-      ) {
-
-        return 1;
-
-      }
-
-
-      // Should practically never happen because the backend
-      // always supplies priority.
-
-      return String(
-        a.studentId || ''
-      ).localeCompare(
-        String(
-          b.studentId || ''
-        )
-      );
-
-    });
-
-}
-
-
-// ============================================================
 // LOAD OFFICIAL BACKEND PRIORITY
+// ============================================================
+//
+// THIS IS THE IMPORTANT FIX.
+//
+// DO NOT sort here.
+//
+// The backend endpoint already calls:
+//     sortStudentsForAllocation()
+//
+// Therefore the array returned by the API is already the
+// official allocation order.
+//
+// The frontend now preserves that exact order.
 // ============================================================
 
 async function loadAllocation() {
@@ -953,6 +987,9 @@ async function loadAllocation() {
     );
 
 
+  if (!tbody) return;
+
+
   tbody.innerHTML =
     '<tr class="loading-row">' +
       '<td colspan="10">' +
@@ -962,21 +999,6 @@ async function loadAllocation() {
 
 
   try {
-
-    /*
-     * ONLY the backend calculates priority.
-     *
-     * The frontend does not know or care whether the backend
-     * used:
-     *
-     * - NCR
-     * - Outside NCR
-     * - distance
-     * - 1000000
-     * - any future priority rule
-     *
-     * It simply receives the official result.
-     */
 
     const data =
       await callApi(
@@ -1001,37 +1023,22 @@ async function loadAllocation() {
     }
 
 
-    /*
-     * Normalize ONLY field names/types.
-     *
-     * No priority calculation happens here.
-     */
+    // ----------------------------------------------------------
+    // CRITICAL FIX:
+    //
+    // DO NOT SORT.
+    //
+    // data.students is already in the exact order produced by
+    // sortStudentsForAllocation() on the backend.
+    // ----------------------------------------------------------
 
-    const backendStudents =
+    allocationStudents =
       data.students.map(
         normalizeAllocationStudent
       );
 
 
-    /*
-     * CRITICAL:
-     *
-     * Sort using ONLY the priority number generated by
-     * the backend.
-     *
-     * This protects the display even if the API response
-     * arrives in an unexpected order.
-     */
-
-    allocationStudents =
-      sortByBackendPriority(
-        backendStudents
-      );
-
-
-    /*
-     * Visual array starts from the official backend order.
-     */
+    // Start visual editing from the official backend order.
 
     visualAllocationStudents =
       allocationStudents.slice();
@@ -1041,10 +1048,18 @@ async function loadAllocation() {
       false;
 
 
-    document.getElementById(
-      'editPriorityBtn'
-    ).textContent =
-      'Edit Priority';
+    const editPriorityBtn =
+      document.getElementById(
+        'editPriorityBtn'
+      );
+
+
+    if (editPriorityBtn) {
+
+      editPriorityBtn.textContent =
+        'Edit Priority';
+
+    }
 
 
     renderAllocationRows(
@@ -1069,8 +1084,6 @@ async function loadAllocation() {
   }
 
 }
-
-
 // ============================================================
 // RENDER ALLOCATION ROWS
 // ============================================================
@@ -1083,6 +1096,9 @@ function renderAllocationRows(
     document.getElementById(
       'allocationTableBody'
     );
+
+
+  if (!tbody) return;
 
 
   if (!students.length) {
@@ -1103,13 +1119,13 @@ function renderAllocationRows(
     students.map(
       function(s, index) {
 
-
         /*
          * NORMAL MODE:
+         * Show the priority number generated by backend.
          *
-         * ALWAYS show the official backend priority.
-         *
-         * Never replace it with frontend index.
+         * EDIT MODE:
+         * The number shown is only a temporary visual position.
+         * It is NEVER sent to backend.
          */
 
         const displayedPriority =
@@ -1265,7 +1281,6 @@ function attachDragEvents() {
 
   rows.forEach(
     function(row) {
-
 
       row.addEventListener(
         'dragstart',
@@ -1442,13 +1457,7 @@ function attachDragEvents() {
           );
 
 
-          /*
-           * ONLY visualAllocationStudents changes.
-           *
-           * allocationStudents remains untouched.
-           *
-           * Backend priority remains untouched.
-           */
+          // Only the visual array changes.
 
           renderAllocationRows(
             visualAllocationStudents
@@ -1467,23 +1476,23 @@ function attachDragEvents() {
 // EDIT PRIORITY
 // ============================================================
 //
-// IMPORTANT:
+// This is visual-only.
 //
-// This does NOT save priority.
-//
-// "Save Priority" simply exits visual editing and restores
-// the official backend order.
-//
+// "Save Priority" does NOT change backend priority.
+// Exiting edit mode restores the official backend order.
 // ============================================================
 
-document
-  .getElementById(
+const editPriorityBtn =
+  document.getElementById(
     'editPriorityBtn'
-  )
-  .addEventListener(
-    'click',
-    async function() {
+  );
 
+
+if (editPriorityBtn) {
+
+  editPriorityBtn.addEventListener(
+    'click',
+    function() {
 
       // --------------------------------------------------------
       // ENTER VISUAL EDIT MODE
@@ -1527,11 +1536,7 @@ document
         'Edit Priority';
 
 
-      /*
-       * Discard ALL visual changes.
-       *
-       * Restore official backend order.
-       */
+      // Discard all visual changes.
 
       visualAllocationStudents =
         allocationStudents.slice();
@@ -1544,16 +1549,22 @@ document
     }
   );
 
+}
+
 
 // ============================================================
 // ALLOCATION SEARCH
 // ============================================================
 
-document
-  .getElementById(
+const allocationSearch =
+  document.getElementById(
     'allocationSearch'
-  )
-  .addEventListener(
+  );
+
+
+if (allocationSearch) {
+
+  allocationSearch.addEventListener(
     'input',
     function() {
 
@@ -1621,28 +1632,33 @@ document
     }
   );
 
+}
+
 
 // ============================================================
 // ALLOCATION REFRESH
 // ============================================================
 
-document
-  .getElementById(
+const allocationRefreshBtn =
+  document.getElementById(
     'allocationRefreshBtn'
-  )
-  .addEventListener(
+  );
+
+
+if (allocationRefreshBtn) {
+
+  allocationRefreshBtn.addEventListener(
     'click',
     function() {
 
-      /*
-       * Refresh ALWAYS gets a fresh official priority
-       * calculation from the backend.
-       */
+      // Always fetch a fresh official backend order.
 
       loadAllocation();
 
     }
   );
+
+}
 
 
 // ============================================================
@@ -1651,19 +1667,15 @@ document
 //
 // CRITICAL:
 //
-// The frontend sends ONLY:
-//
+// Frontend sends ONLY:
 // - batchId
 // - adminKey
 //
 // It NEVER sends:
-//
 // - priority
 // - student order
 // - dragged order
 // - row index
-// - allocationStudents
-// - visualAllocationStudents
 //
 // Backend independently performs:
 //
@@ -1675,14 +1687,17 @@ document
 //
 // ============================================================
 
-document
-  .getElementById(
+const allocateAllBtn =
+  document.getElementById(
     'allocateAllBtn'
-  )
-  .addEventListener(
+  );
+
+
+if (allocateAllBtn) {
+
+  allocateAllBtn.addEventListener(
     'click',
     async function() {
-
 
       const session =
         requireAdminSession();
@@ -1722,7 +1737,6 @@ document
 
       try {
 
-
         // ------------------------------------------------------
         // GET CURRENT BATCH FROM BACKEND
         // ------------------------------------------------------
@@ -1755,9 +1769,8 @@ document
         // ACTUAL ALLOCATION
         // ------------------------------------------------------
         //
-        // Frontend priority/order is NOT sent.
-        //
-        // Backend recalculates everything itself.
+        // Do NOT send frontend priority/order.
+        // Backend recalculates the official order itself.
         // ------------------------------------------------------
 
         const data =
@@ -1804,7 +1817,6 @@ document
 
         console.error(err);
 
-
         alert(
           err.message ||
           'Allocation failed.'
@@ -1816,7 +1828,6 @@ document
         this.disabled =
           false;
 
-
         this.textContent =
           'Allocate All';
 
@@ -1824,6 +1835,8 @@ document
 
     }
   );
+
+}
 
 
 // ============================================================
@@ -1840,7 +1853,7 @@ document.addEventListener(
 );
 
 
-// In case DOMContentLoaded has already fired.
+// In case this script is loaded after DOMContentLoaded.
 
 if (
   document.readyState !==
