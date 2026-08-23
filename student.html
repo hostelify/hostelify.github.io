@@ -10,7 +10,7 @@
 <body class="dashboard-page">
 <div id="pageLoader" class="page-loader">
   <div class="loader-card">
-    <div class="loader-mark">HH</div>
+    <div class="loader-mark">H</div>
     <p id="loaderText" class="loader-text">Loading your dashboard...</p>
     <div class="loader-track"><span id="loaderBarFill" class="loader-fill"></span></div>
   </div>
@@ -39,7 +39,11 @@
       <div class="form-section"><div class="form-section-title">Academic details</div><div class="form-grid">
         <label>Course<input id="pCourse" required placeholder="eg - CSE"></label>
         <label>Year<select id="pYear" required><option value="">Select year</option><option>1</option><option>2</option><option>3</option><option>4</option></select></label>
-        <label>Hostel preference<input id="pPreference" required placeholder="H01"></label>
+        <label for="pPreference">Hostel Preference
+  <select id="pPreference" name="hostelPreference" required disabled>
+    <option value="">Select gender first</option>
+  </select>
+</label>
         
       </div></div>
       <div class="form-section"><div class="form-section-title">Home details</div><div class="form-grid">
