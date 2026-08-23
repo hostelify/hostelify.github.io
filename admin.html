@@ -37,11 +37,11 @@
         <div class="stat"><small>TOTAL STUDENTS</small><strong id="total">—</strong></div><div class="stat"><small>REGISTERED</small><strong id="registered">—</strong></div><div class="stat"><small>ALLOCATED</small><strong id="allocated">—</strong></div><div class="stat"><small>NOT ALLOCATED</small><strong id="notAllocated">—</strong></div>
       </div>
       <section class="admin-actions">
-        <article><span class="action-num">01</span><h3>Run allocation</h3><p>Allocate eligible students using the backend priority and scoring rules. Results are hidden after every run, even if a previous round was published — publish again below when ready.</p><button id="runBtn" class="btn btn-primary">Run allocation</button><div id="runMessage" class="form-message"></div></article>
-        <article><span class="action-num">02</span><h3>Publish results</h3><p>Make the latest allocation round visible to students. Add a remark shown on their result card instead of the default welcome message — useful for labelling rounds, e.g. "Second allocation result".</p><label class="inline-field">Remark (optional)<input id="publishRemark" type="text" maxlength="120" placeholder="e.g. Second allocation result"></label><button id="publishBtn" class="btn btn-dark">Publish results</button><div id="publishMessage" class="form-message"></div></article>
-        <article><span class="action-num">03</span><h3>Hide results</h3><p>Temporarily hide published results from student access.</p><button id="unpublishBtn" class="btn btn-ghost">Hide results</button><div id="unpublishMessage" class="form-message"></div></article>
-        <article><span class="action-num">04</span><h3>Lock hostel form</h3><p>Temporarily stop students from submitting the hostel form.</p><button id="lockSubmissionBtn" class="btn btn-dark">Lock hostel form</button><div id="lockSubmissionMessage" class="form-message"></div></article>
-        <article><span class="action-num">05</span><h3>Lock edit form</h3><p>Temporarily stop students from editing an already-submitted hostel form.</p><button id="lockEditBtn" class="btn btn-dark">Lock edit form</button><div id="lockEditMessage" class="form-message"></div></article>
+        <article><span class="action-num">01</span><h3>Run allocation</h3><button id="runBtn" class="btn btn-primary">Run allocation</button><div id="runMessage" class="form-message"></div></article>
+        <article><span class="action-num">02</span><h3>Publish results</h3><label class="inline-field">Remark (optional)<input id="publishRemark" type="text" maxlength="120" placeholder="e.g. Second allocation result"></label><button id="publishBtn" class="btn btn-dark">Publish results</button><div id="publishMessage" class="form-message"></div></article>
+        <article><span class="action-num">03</span><h3>Hide results</h3><button id="unpublishBtn" class="btn btn-ghost">Hide results</button><div id="unpublishMessage" class="form-message"></div></article>
+        <article><span class="action-num">04</span><h3>Lock hostel form</h3><button id="lockSubmissionBtn" class="btn btn-dark">Lock hostel form</button><div id="lockSubmissionMessage" class="form-message"></div></article>
+        <article><span class="action-num">05</span><h3>Lock edit button</h3><button id="lockEditBtn" class="btn btn-dark">Lock edit form</button><div id="lockEditMessage" class="form-message"></div></article>
         <article class="danger-action-card"><span class="action-num">06</span><h3>Reset allocation</h3><p>Restores rooms to Available and students to Registered. Use only when necessary.</p><button id="resetBtn" class="btn btn-danger">Reset allocation</button><div id="resetMessage" class="form-message"></div></article>
       </section>
       <div id="adminMessage" class="form-message"></div>
@@ -61,7 +61,7 @@
     </div>
 
     <div id="tab-priority" class="tab-panel hidden">
-      <section class="control-card"><div><span class="eyebrow">QUEUE</span><p>Shows only students still waiting on a room (Registered or Not Allocated). Already-Allocated students are left off this list.</p></div><div class="form-grid admin-controls"><label>Batch ID<input id="priorityBatchId" placeholder="BATCH-001"></label><button id="priorityBtn" class="btn btn-dark">Load priority list</button></div></section>
+      <section class="control-card"><div class="form-grid admin-controls"><label>Batch ID<input id="priorityBatchId" placeholder="BATCH-001"></label><button id="priorityBtn" class="btn btn-dark">Load priority list</button></div></section>
       <div class="priority-table-wrap">
         <table class="priority-table">
           <thead>
