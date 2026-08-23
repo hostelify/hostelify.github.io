@@ -7,10 +7,74 @@ let editingMode = false;
 let formLockState = { formSubmissionLocked: false, formEditLocked: false };
 
 // ======================================================
+// FAKE LOADING SCREEN
+// ======================================================
+// Shown from page load until every startup fetch (form
+// lock status, profile, priority, result) has resolved.
+// A minimum display time + a slow, staged progress bar
+// keep it from flashing on fast connections.
+
+function showPageLoader() {
+  const loader = document.getElementById("pageLoader");
+  const fill = document.getElementById("loaderBarFill");
+  const text = document.getElementById("loaderText");
+
+  const messages = [
+    "Loading your dashboard...",
+    "Fetching your profile...",
+    "Checking your allocation status...",
+    "Almost there..."
+  ];
+
+  let msgIndex = 0;
+  let progress = 0;
+  const startTime = Date.now();
+  const minDuration = 900;
+
+  const progressTimer = setInterval(() => {
+    // Slow down as it approaches the fake ceiling so it
+    // never looks "done" before the real work finishes.
+    progress += Math.random() * (progress < 60 ? 16 : 4);
+    if (progress > 88) progress = 88;
+    if (fill) fill.style.width = progress + "%";
+  }, 220);
+
+  const textTimer = setInterval(() => {
+    msgIndex = (msgIndex + 1) % messages.length;
+    if (text) text.textContent = messages[msgIndex];
+  }, 950);
+
+  return {
+    async finish() {
+      clearInterval(progressTimer);
+      clearInterval(textTimer);
+
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, minDuration - elapsed);
+      if (remaining) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
+
+      if (fill) fill.style.width = "100%";
+      if (text) text.textContent = "Ready.";
+
+      await new Promise(resolve => setTimeout(resolve, 350));
+
+      if (loader) {
+        loader.classList.add("loader-hidden");
+        setTimeout(() => { loader.style.display = "none"; }, 500);
+      }
+    }
+  };
+}
+
+// ======================================================
 // SESSION CHECK
 // ======================================================
 
 if (!session) {
+  const loader = document.getElementById("pageLoader");
+  if (loader) loader.style.display = "none";
   window.location.href = "index.html#login";
 } else {
   initializeStudentPortal();
@@ -889,6 +953,8 @@ document
 
 async function initializeStudentPortal() {
 
+  const pageLoader = showPageLoader();
+
   const dashboardStudentId =
     document.getElementById(
       "dashboardStudentId"
@@ -932,5 +998,9 @@ async function initializeStudentPortal() {
       "p"
     ).textContent =
       err.message;
+
+  } finally {
+
+    await pageLoader.finish();
   }
 }
