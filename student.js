@@ -177,11 +177,26 @@ function fillProfile(profile) {
   document.getElementById("pEmail").value =
     profile.email || "";
 
-  document.getElementById("pGender").value =
+  // ------------------------------
+  // Gender
+  // ------------------------------
+
+  const genderSelect =
+    document.getElementById("pGender");
+
+  genderSelect.value =
     profile.gender || "";
+
+  // ------------------------------
+  // PWD
+  // ------------------------------
 
   document.getElementById("pPwd").value =
     profile.pwd || "No";
+
+  // ------------------------------
+  // Academic details
+  // ------------------------------
 
   document.getElementById("pCourse").value =
     profile.course || "";
@@ -189,8 +204,34 @@ function fillProfile(profile) {
   document.getElementById("pYear").value =
     profile.year || "";
 
-  document.getElementById("pPreference").value =
+  // ------------------------------
+  // Hostel preference
+  // ------------------------------
+
+  updateHostelPreferences();
+
+  const hostelPreference =
+    document.getElementById("pPreference");
+
+  const savedHostel =
     profile.hostelPreference || "";
+
+  // Only restore a hostel that is valid
+  // for the selected gender.
+  const allowedHostels =
+    profile.gender === "Male"
+      ? ["H01", "H02"]
+      : profile.gender === "Female"
+        ? ["H03"]
+        : [];
+
+  if (allowedHostels.includes(savedHostel)) {
+    hostelPreference.value = savedHostel;
+  }
+
+  // ------------------------------
+  // Location
+  // ------------------------------
 
   document.getElementById("pState").value =
     profile.state || "";
@@ -336,7 +377,7 @@ async function loadPriority() {
 
       priorityEl.textContent =
         result.totalInBatch
-          ? `#${result.priorityRank} of ${result.totalInBatch}`
+          ? `#${result.priorityRank}`
           : `#${result.priorityRank}`;
 
     } else {
@@ -1004,3 +1045,67 @@ async function initializeStudentPortal() {
     await pageLoader.finish();
   }
 }
+// ======================================================
+// GENDER → HOSTEL PREFERENCE
+// ======================================================
+
+const genderSelect = document.getElementById("pGender");
+const hostelPreference = document.getElementById("pPreference");
+
+function updateHostelPreferences() {
+  if (!genderSelect || !hostelPreference) {
+    return;
+  }
+
+  const gender = genderSelect.value;
+
+  // Clear existing options
+  hostelPreference.innerHTML = "";
+
+  // No gender selected
+  if (!gender) {
+    hostelPreference.disabled = true;
+
+    const option = document.createElement("option");
+    option.value = "";
+    option.textContent = "Select gender first";
+    hostelPreference.appendChild(option);
+
+    return;
+  }
+
+  // Enable hostel preference
+  hostelPreference.disabled = false;
+
+  // Default option
+  const defaultOption = document.createElement("option");
+  defaultOption.value = "";
+  defaultOption.textContent = "Select hostel";
+  hostelPreference.appendChild(defaultOption);
+
+  // Male → H01, H02
+  if (gender === "Male") {
+    ["H01", "H02"].forEach(hostel => {
+      const option = document.createElement("option");
+      option.value = hostel;
+      option.textContent = hostel;
+      hostelPreference.appendChild(option);
+    });
+  }
+
+  // Female → H03
+  else if (gender === "Female") {
+    const option = document.createElement("option");
+    option.value = "H03";
+    option.textContent = "H03";
+    hostelPreference.appendChild(option);
+  }
+}
+
+// Update hostel options whenever gender changes
+if (genderSelect) {
+  genderSelect.addEventListener("change", updateHostelPreferences);
+}
+
+// Initialize on page load
+updateHostelPreferences();
