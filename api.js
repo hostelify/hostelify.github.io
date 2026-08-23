@@ -37,7 +37,7 @@ const API = {
   result: studentId => apiGet("getStudentResult", {studentId}),
   priority: studentId => apiPost("getStudentPriority", {studentId}),
   summary: (batchId, adminKey) => apiPost("getBatchSummary", {batchId, adminKey}),
-  allocate: (batchId, adminKey, limit) => apiPost("runAllocation", {batchId, adminKey, limit}),
+  allocate: (batchId, adminKey) => apiPost("runAllocation", {batchId, adminKey}),
   publish: (batchId, adminKey, remark) => apiPost("publishResults", {batchId, adminKey, remark}),
   unpublish: (batchId, adminKey) => apiPost("unpublishResults", {batchId, adminKey}),
   reset: adminKey => apiPost("resetAllocation", {adminKey}),
@@ -47,7 +47,8 @@ const API = {
   occupancy: adminKey => apiPost("getOccupancyStats", {adminKey}),
   formLockStatus: adminKey => apiPost("getFormLockStatus", {adminKey}),
   setFormLock: (lockType, locked, adminKey) => apiPost("setFormLock", {lockType, locked, adminKey}),
-  formLockStatusPublic: () => apiPost("getFormLockStatusPublic", {})
+  formLockStatusPublic: () => apiPost("getFormLockStatusPublic", {}),
+  announcements: () => apiPost("getPublicAnnouncements", {})
 };
 
 // ======================================================
@@ -56,7 +57,13 @@ const API = {
 (function () {
   const THEME_KEY = "hostelHubTheme";
 
+  // Pages that should always render in light mode regardless of
+  // any theme saved from another page (e.g. sign in / sign up),
+  // flagged via <html data-force-light-theme> in that page's markup.
+  const forceLight = document.documentElement.hasAttribute("data-force-light-theme");
+
   function preferredTheme() {
+    if (forceLight) return "light";
     const saved = localStorage.getItem(THEME_KEY);
     if (saved === "light" || saved === "dark") return saved;
     return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
