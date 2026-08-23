@@ -3,6 +3,40 @@ const adminConsole = document.getElementById("adminConsole");
 const adminForm = document.getElementById("adminLoginForm");
 let adminKey = sessionStorage.getItem("hostelAdminKey") || "";
 
+// ======================================================
+// SMALL POPUP LOADING SCREEN (shown while an admin
+// action is talking to the backend)
+// ======================================================
+const MIN_POPUP_DURATION_MS = 450;
+
+function showActionPopup(text) {
+  const popup = document.getElementById("adminActionPopup");
+  const textEl = document.getElementById("adminActionPopupText");
+  if (textEl) textEl.textContent = text || "Working...";
+  if (popup) popup.classList.add("visible");
+}
+
+function hideActionPopup() {
+  const popup = document.getElementById("adminActionPopup");
+  if (popup) popup.classList.remove("visible");
+}
+
+// Wraps an async action with the popup, guaranteeing it stays
+// visible for at least MIN_POPUP_DURATION_MS so it doesn't just
+// flash on fast responses.
+async function withActionPopup(text, fn) {
+  showActionPopup(text);
+  const start = Date.now();
+  try {
+    return await fn();
+  } finally {
+    const elapsed = Date.now() - start;
+    const remaining = Math.max(0, MIN_POPUP_DURATION_MS - elapsed);
+    if (remaining) await new Promise(resolve => setTimeout(resolve, remaining));
+    hideActionPopup();
+  }
+}
+
 function showConsole() {
   adminLogin.classList.add("hidden"); adminConsole.classList.remove("hidden");
   loadFormLockStatus();
@@ -15,7 +49,7 @@ adminForm.addEventListener("submit", async e => {
   const msg = document.getElementById("adminLoginMessage");
   try {
     setLoading(adminForm.querySelector("button"), true, "Checking...");
-    await API.verifyAdmin(key);
+    await withActionPopup("Verifying admin key...", () => API.verifyAdmin(key));
     adminKey = key;
     sessionStorage.setItem("hostelAdminKey", key);
     showConsole();
@@ -28,7 +62,7 @@ async function loadSummary() {
   if (!batch) return;
   const msg = document.getElementById("adminMessage");
   try {
-    const result = await API.summary(batch, adminKey);
+    const result = await withActionPopup("Loading batch summary...", () => API.summary(batch, adminKey));
     document.getElementById("total").textContent = result.totalStudents;
     document.getElementById("registered").textContent = result.registered;
     document.getElementById("allocated").textContent = result.allocated;
@@ -39,40 +73,37 @@ async function loadSummary() {
 }
 document.getElementById("summaryBtn").addEventListener("click", loadSummary);
 
-async function adminAction(fn, button, ...extraArgs) {
+async function adminAction(fn, button, popupText, msgId, ...extraArgs) {
   const batch = document.getElementById("batchId").value.trim();
-  const msg = document.getElementById("adminMessage");
-  if (!batch) { msg.textContent = "Batch ID is required."; return; }
-  if (!adminKey) { msg.textContent = "Admin session is not authenticated."; return; }
+  const msg = document.getElementById(msgId);
+  if (!batch) { msg.className = "form-message"; msg.textContent = "Batch ID is required."; return; }
+  if (!adminKey) { msg.className = "form-message"; msg.textContent = "Admin session is not authenticated."; return; }
   try {
     setLoading(button, true, "Working...");
-    const result = await fn(batch, adminKey, ...extraArgs);
+    const result = await withActionPopup(popupText || "Processing your request...", () => fn(batch, adminKey, ...extraArgs));
     msg.className = "form-message success"; msg.textContent = result.message || "Action completed.";
     await loadSummary();
   } catch (err) { msg.className = "form-message"; msg.textContent = err.message; }
   finally { setLoading(button, false); }
 }
 document.getElementById("runBtn").addEventListener("click", e => {
-  const limitInput = document.getElementById("allocationLimit");
-  const rawLimit = limitInput ? limitInput.value.trim() : "";
-  const limit = rawLimit === "" ? undefined : Number(rawLimit);
-  adminAction(API.allocate, e.currentTarget, limit);
+  adminAction(API.allocate, e.currentTarget, "Running allocation...", "runMessage");
 });
 document.getElementById("publishBtn").addEventListener("click", e => {
   const remarkInput = document.getElementById("publishRemark");
   const remark = remarkInput ? remarkInput.value.trim() : "";
-  adminAction(API.publish, e.currentTarget, remark);
+  adminAction(API.publish, e.currentTarget, "Publishing results...", "publishMessage", remark);
 });
-document.getElementById("unpublishBtn").addEventListener("click", e => adminAction(API.unpublish, e.currentTarget));
+document.getElementById("unpublishBtn").addEventListener("click", e => adminAction(API.unpublish, e.currentTarget, "Hiding results...", "unpublishMessage"));
 document.getElementById("resetBtn").addEventListener("click", async e => {
   if (!confirm("Reset allocation? This will restore all rooms and student statuses.")) return;
-  const msg = document.getElementById("adminMessage");
+  const msg = document.getElementById("resetMessage");
   try {
     setLoading(e.currentTarget, true, "Resetting...");
-    const result = await API.reset(adminKey);
+    const result = await withActionPopup("Resetting allocation...", () => API.reset(adminKey));
     msg.className = "form-message success"; msg.textContent = result.message;
     await loadSummary();
-  } catch (err) { msg.textContent = err.message; }
+  } catch (err) { msg.className = "form-message"; msg.textContent = err.message; }
   finally { setLoading(e.currentTarget, false); }
 });
 document.getElementById("adminLogout").addEventListener("click", () => {
@@ -99,7 +130,8 @@ async function loadFormLockStatus() {
 function updateFormLockButtons() {
   const subBtn = document.getElementById("lockSubmissionBtn");
   const editBtn = document.getElementById("lockEditBtn");
-  const statusText = document.getElementById("formLockStatusText");
+  const subMsg = document.getElementById("lockSubmissionMessage");
+  const editMsg = document.getElementById("lockEditMessage");
 
   subBtn.textContent = formLockState.formSubmissionLocked ? "Unlock hostel form" : "Lock hostel form";
   subBtn.classList.toggle("btn-danger", formLockState.formSubmissionLocked);
@@ -109,18 +141,20 @@ function updateFormLockButtons() {
   editBtn.classList.toggle("btn-danger", formLockState.formEditLocked);
   editBtn.classList.toggle("btn-dark", !formLockState.formEditLocked);
 
-  statusText.className = "form-message";
-  statusText.textContent =
-    `Submissions: ${formLockState.formSubmissionLocked ? "Locked" : "Open"} · Editing: ${formLockState.formEditLocked ? "Locked" : "Open"}`;
+  subMsg.className = "form-message";
+  subMsg.textContent = `Submissions are currently ${formLockState.formSubmissionLocked ? "Locked" : "Open"}.`;
+
+  editMsg.className = "form-message";
+  editMsg.textContent = `Editing is currently ${formLockState.formEditLocked ? "Locked" : "Open"}.`;
 }
 
 document.getElementById("lockSubmissionBtn").addEventListener("click", async e => {
   const btn = e.currentTarget;
-  const statusText = document.getElementById("formLockStatusText");
+  const statusText = document.getElementById("lockSubmissionMessage");
   try {
     setLoading(btn, true, "Updating...");
     const next = !formLockState.formSubmissionLocked;
-    await API.setFormLock("submission", next, adminKey);
+    await withActionPopup(next ? "Locking hostel form..." : "Unlocking hostel form...", () => API.setFormLock("submission", next, adminKey));
   } catch (err) {
     statusText.className = "form-message";
     statusText.textContent = err.message;
@@ -135,11 +169,11 @@ document.getElementById("lockSubmissionBtn").addEventListener("click", async e =
 
 document.getElementById("lockEditBtn").addEventListener("click", async e => {
   const btn = e.currentTarget;
-  const statusText = document.getElementById("formLockStatusText");
+  const statusText = document.getElementById("lockEditMessage");
   try {
     setLoading(btn, true, "Updating...");
     const next = !formLockState.formEditLocked;
-    await API.setFormLock("edit", next, adminKey);
+    await withActionPopup(next ? "Locking edit form..." : "Unlocking edit form...", () => API.setFormLock("edit", next, adminKey));
   } catch (err) {
     statusText.className = "form-message";
     statusText.textContent = err.message;
@@ -184,7 +218,7 @@ async function loadAllStudents() {
     msg.className = "form-message";
     msg.textContent = "";
 
-    const result = await API.allStudents(batch, adminKey);
+    const result = await withActionPopup("Loading all students...", () => API.allStudents(batch, adminKey));
     const students = result.students || [];
 
     if (students.length === 0) {
@@ -234,7 +268,7 @@ async function loadPriorityList() {
     msg.className = "form-message";
     msg.textContent = "";
 
-    const result = await API.priorityList(batch, adminKey);
+    const result = await withActionPopup("Loading priority list...", () => API.priorityList(batch, adminKey));
 
     // PWD (person-with-disability) students are pulled to the top of the
     // priority list, ahead of everyone else. Array.prototype.sort is a
@@ -282,7 +316,7 @@ document.getElementById("priorityBtn").addEventListener("click", loadPriorityLis
 let occupancyPollTimer = null;
 const OCCUPANCY_POLL_INTERVAL_MS = 15000;
 
-async function loadOccupancy() {
+async function loadOccupancy(manual) {
   const msg = document.getElementById("occupancyMessage");
   const listEl = document.getElementById("occupancyHostelList");
   const lastUpdated = document.getElementById("occupancyLastUpdated");
@@ -290,7 +324,9 @@ async function loadOccupancy() {
   if (!adminKey) { msg.textContent = "Admin session is not authenticated."; return; }
 
   try {
-    const result = await API.occupancy(adminKey);
+    const result = manual
+      ? await withActionPopup("Refreshing occupancy data...", () => API.occupancy(adminKey))
+      : await API.occupancy(adminKey);
     const totals = result.totals || {};
     const hostels = result.hostels || [];
 
@@ -309,7 +345,7 @@ async function loadOccupancy() {
     msg.textContent = err.message;
   }
 }
-document.getElementById("occupancyRefreshBtn").addEventListener("click", loadOccupancy);
+document.getElementById("occupancyRefreshBtn").addEventListener("click", () => loadOccupancy(true));
 
 function renderOccupancyHostelList(listEl, hostels) {
   // Remember which hostel blocks were expanded, so a live refresh
