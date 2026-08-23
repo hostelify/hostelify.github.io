@@ -17,7 +17,7 @@ h1,h2,h3,p{margin-top:0}h1,h2,h3,.brand{font-family:Manrope,sans-serif}.topbar,.
 .priority-status-half small{display:block;font-size:10px;letter-spacing:1.4px;color:var(--muted);margin-bottom:8px}
 .priority-status-half strong{display:block;font:800 30px Manrope;color:var(--ink)}
 .priority-status-divider{width:1px;align-self:stretch;background:var(--line)}
-@media(max-width:800px){.priority-status-split{flex-direction:column;gap:16px}.priority-status-divider{width:60%;height:1px}}.status-line{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:13px 0;font-size:13px}.status-line span{color:var(--muted)}.hidden{display:none!important}.admin-badge{font-size:10px;letter-spacing:1.5px;font-weight:800;color:var(--primary)}.admin-login{max-width:520px;margin:70px auto}.admin-controls{display:grid;grid-template-columns:1fr auto;align-items:end}.admin-controls label{margin:0}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0}.stat strong{font:800 32px Manrope}.admin-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.admin-actions article{display:flex;flex-direction:column}.admin-actions h3{font-size:20px;margin:40px 0 8px}.admin-actions p{flex:1;margin-bottom:14px}.admin-actions .inline-field{margin-bottom:0}.admin-actions .btn{margin-top:12px}.danger-card{margin-top:18px;display:flex;justify-content:space-between;align-items:center;gap:20px;border-color:#f0d2d0}.danger-card h3{margin:3px 0 6px}.danger-card p{margin:0}
+@media(max-width:800px){.priority-status-split{flex-direction:column;gap:16px}.priority-status-divider{width:60%;height:1px}}.status-line{display:flex;justify-content:space-between;border-bottom:1px solid var(--line);padding:13px 0;font-size:13px}.status-line span{color:var(--muted)}.hidden{display:none!important}.admin-badge{font-size:10px;letter-spacing:1.5px;font-weight:800;color:var(--primary)}.admin-login{max-width:520px;margin:70px auto}.admin-controls{display:grid;grid-template-columns:1fr auto;align-items:end}.admin-controls label{margin:0}.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:15px;margin:20px 0}.stat strong{font:800 32px Manrope}.admin-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}.admin-actions article{display:flex;flex-direction:column}.admin-actions h3{font-size:20px;margin:40px 0 8px}.admin-actions p{flex:1;margin-bottom:14px}.admin-actions .inline-field{margin-bottom:0}.admin-actions .btn{margin-top:12px}
 .toast{position:fixed;right:22px;bottom:22px;background:var(--ink);color:#fff;padding:13px 17px;border-radius:12px;font-size:13px;transform:translateY(130px);transition:.25s;z-index:20}.toast.show{transform:translateY(0)}
 @media(max-width:800px){.topbar nav{display:none}.hero{grid-template-columns:1fr;padding-top:55px}.hero-card{height:420px}.feature-grid,.login-section,.dashboard-grid,.admin-actions{grid-template-columns:1fr}.form-grid,.stats-grid{grid-template-columns:1fr}.welcome{align-items:flex-start;flex-direction:column}.allocation-grid{grid-template-columns:1fr}.admin-controls{grid-template-columns:1fr}.admin-controls .btn{width:100%}.hero h1{font-size:50px}.form-intro h1,.welcome h1{font-size:35px}.floating-card.top{right:-5px}.floating-card.bottom{left:-5px}.campus-card{width:88%}}
 
@@ -148,3 +148,49 @@ html[data-theme="dark"] .occ-chip-occupied{background:#2c1a19;color:#ff8f86}
 html[data-theme="dark"] .status-pill.status-registered,
 html[data-theme="dark"] .occ-chip-rate{background:#22261d;color:var(--muted)}
 html[data-theme="dark"] .brand-mark{background:var(--ink);color:var(--paper)}
+/* ======================================================
+   PAGE LOADER (fake loading screen shown until the
+   student portal has finished fetching everything)
+   ====================================================== */
+.page-loader{position:fixed;inset:0;z-index:999;display:grid;place-items:center;background:var(--paper);transition:opacity .45s ease;}
+.page-loader.loader-hidden{opacity:0;pointer-events:none;}
+.loader-card{display:flex;flex-direction:column;align-items:center;gap:18px;text-align:center;padding:20px}
+.loader-mark{width:56px;height:56px;border-radius:16px;background:var(--ink);color:#fff;display:grid;place-items:center;font:800 18px Manrope,sans-serif;letter-spacing:.5px;animation:loaderPulse 1.4s ease-in-out infinite}
+.loader-text{color:var(--muted);font-size:13px;font-weight:600;min-width:230px;margin:0;transition:opacity .2s ease}
+.loader-track{width:220px;height:6px;border-radius:999px;background:var(--line);overflow:hidden}
+.loader-fill{display:block;height:100%;width:0%;background:var(--primary);border-radius:999px;transition:width .35s ease}
+@keyframes loaderPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+
+/* ======================================================
+   ADMIN ACTION POPUP (small fake loading popup shown
+   while an admin action is talking to the backend)
+   ====================================================== */
+.admin-action-popup{position:fixed;inset:0;z-index:998;display:grid;place-items:center;background:rgba(15,20,15,.32);backdrop-filter:blur(2px);opacity:0;pointer-events:none;transition:opacity .22s ease;}
+.admin-action-popup.visible{opacity:1;pointer-events:all;}
+.admin-action-popup-card{display:flex;align-items:center;gap:14px;background:var(--white);border:1px solid var(--line);border-radius:16px;padding:16px 22px;box-shadow:var(--shadow);min-width:200px;transform:translateY(4px);transition:transform .22s ease;}
+.admin-action-popup.visible .admin-action-popup-card{transform:translateY(0);}
+.admin-action-popup-spinner{width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--primary);animation:adminPopupSpin .7s linear infinite;flex:0 0 auto;}
+.admin-action-popup-text{font:700 13px "DM Sans",sans-serif;color:var(--ink);}
+@keyframes adminPopupSpin{to{transform:rotate(360deg)}}
+
+/* Reset allocation keeps the same small card shape as the other
+   admin action cards, just with a danger tint so it still reads
+   as the risky one in the grid. */
+.admin-actions article.danger-action-card{border-color:#f0d2d0;}
+.admin-actions article.danger-action-card .action-num{color:var(--danger);}
+html[data-theme="dark"] .admin-actions article.danger-action-card{border-color:#4a2624;}
+
+/* ======================================================
+   ANNOUNCEMENTS PANEL (sign-in page) — reflects live
+   admin state: publish/hide results, lock/unlock forms
+   ====================================================== */
+.announcement-panel{max-width:1100px;margin:44px auto 0;padding:0 max(5%,calc((100% - 1100px)/2));}
+.announcement-panel h2{font-size:28px;letter-spacing:-1px;margin:4px 0 18px;}
+.announcement-list{display:flex;flex-direction:column;gap:12px;}
+.announcement-item{display:flex;align-items:flex-start;gap:13px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;}
+.announcement-item strong{display:block;font-size:13px;}
+.announcement-item p{margin:4px 0 0;color:var(--muted);font-size:13px;line-height:1.55;}
+.announcement-dot{width:9px;height:9px;border-radius:50%;margin-top:5px;flex:0 0 auto;background:var(--muted);}
+.announcement-item.status-positive .announcement-dot{background:var(--primary);}
+.announcement-item.status-warning .announcement-dot{background:#c99a1f;}
+.announcement-item.status-danger .announcement-dot{background:var(--danger);}
