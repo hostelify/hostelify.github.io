@@ -184,7 +184,7 @@ html[data-theme="dark"] .admin-actions article.danger-action-card{border-color:#
    ANNOUNCEMENTS PANEL (sign-in page) — reflects live
    admin state: publish/hide results, lock/unlock forms
    ====================================================== */
-.announcement-panel{max-width:1100px;margin:44px auto 0;padding:0 max(5%,calc((100% - 1100px)/2));}
+.announcement-panel{max-width:1100px;margin:44px 0 0;padding:0 max(5%,calc((100% - 1100px)/2));}
 .announcement-panel h2{font-size:28px;letter-spacing:-1px;margin:4px 0 18px;}
 .announcement-list{display:flex;flex-direction:column;gap:12px;}
 .announcement-item{display:flex;align-items:flex-start;gap:13px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px 18px;}
