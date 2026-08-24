@@ -1,5 +1,5 @@
 // Replace this with your deployed Apps Script Web App URL.
-const API_URL = "https://script.google.com/macros/s/AKfycby2KGx5ySk9-HvLyHp8OHef8_-ou16VuIm0yXT5U8jaGfcVUTOLnlSvU5wLmPPtg55-Tg/exec";
+const API_URL = "https://script.google.com/macros/s/AKfycby4AwZsicXge7qL1ix3_vrY2HgvZxHcYWbRfLa8mV3Wxwaef6dWW4vnaVEKeY7QSrUDpg/exec";
 
 async function apiPost(action, data = {}) {
   if (!API_URL || API_URL.includes("YOUR_APPS_SCRIPT")) {
