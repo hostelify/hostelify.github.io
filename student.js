@@ -218,11 +218,11 @@ function fillProfile(profile) {
 
   // Only restore a hostel that is valid
   // for the selected gender.
-  const allowedHostels =
+   const allowedHostels =
     profile.gender === "Male"
       ? ["H01", "H02"]
       : profile.gender === "Female"
-        ? ["H03"]
+        ? ["H03", "H04"]
         : [];
 
   if (allowedHostels.includes(savedHostel)) {
@@ -1093,14 +1093,15 @@ function updateHostelPreferences() {
     });
   }
 
-  // Female → H03
+   // Female → H03, H04
   else if (gender === "Female") {
-    const option = document.createElement("option");
-    option.value = "H03";
-    option.textContent = "H03";
-    hostelPreference.appendChild(option);
+    ["H03", "H04"].forEach(hostel => {
+      const option = document.createElement("option");
+      option.value = hostel;
+      option.textContent = hostel;
+      hostelPreference.appendChild(option);
+    });
   }
-}
 
 // Update hostel options whenever gender changes
 if (genderSelect) {
