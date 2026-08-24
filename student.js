@@ -1102,6 +1102,7 @@ function updateHostelPreferences() {
       hostelPreference.appendChild(option);
     });
   }
+}
 
 // Update hostel options whenever gender changes
 if (genderSelect) {
