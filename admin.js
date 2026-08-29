@@ -281,34 +281,35 @@ async function loadPriorityList() {
     // students keep the relative order the backend already gave them.
     const students = (result.students || []).slice().sort((a, b) => isPwd(b) - isPwd(a));
 
-    if (students.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="13" class="priority-empty">No students found for this batch.</td></tr>`;
-    } else {
-      tbody.innerHTML = students.map((s, i) => `
-        <tr class="${isPwd(s) ? "pwd-priority-row" : ""}">
-          <td>${i + 1}</td>
-          <td>${escapeHtml(s.studentId)}</td>
-          <td>${escapeHtml(s.name || "—")}</td>
-          <td>${escapeHtml(s.region || "—")}</td>
-          <td>${s.campusDistanceKm !== "" && s.campusDistanceKm != null ? s.campusDistanceKm : "—"}</td>
-          <td>${escapeHtml(s.course || "—")}</td>
-          <td>${escapeHtml(String(s.year || "—"))}</td>
-          <td>${escapeHtml(s.hostelPreference || "—")}</td>
-          <td>${isPwd(s) ? `<span class="status-pill status-allocated">Yes</span>` : "No"}</td>
-          <td><span class="status-pill status-${slug(s.status)}">${escapeHtml(s.status || "—")}</span></td>
-          <td>${escapeHtml(s.allocatedHostelId || "—")}</td>
-          <td>${escapeHtml(s.allocatedRoomId || "—")}</td>
-          <td>${s.allocationScore !== "" && s.allocationScore != null ? s.allocationScore : "—"}</td>
-        </tr>
-      `).join("");
-    }
-
+  if (students.length === 0) {
+  tbody.innerHTML = `<tr><td colspan="15" class="priority-empty">No students found for this batch.</td></tr>`;
+} else {
+  tbody.innerHTML = students.map((s, i) => `
+    <tr class="${isPwd(s) ? "pwd-priority-row" : ""}">
+      <td>${i + 1}</td>
+      <td>${escapeHtml(s.studentId)}</td>
+      <td>${escapeHtml(s.name || "—")}</td>
+      <td>${escapeHtml(s.region || "—")}</td>
+      <td>${escapeHtml(s.state || "—")}</td>
+      <td>${s.zone !== "" && s.zone != null ? s.zone : "—"}</td>
+      <td>${s.campusDistanceKm !== "" && s.campusDistanceKm != null ? s.campusDistanceKm : "—"}</td>
+      <td>${escapeHtml(s.course || "—")}</td>
+      <td>${escapeHtml(String(s.year || "—"))}</td>
+      <td>${escapeHtml(s.hostelPreference || "—")}</td>
+      <td>${isPwd(s) ? `<span class="status-pill status-allocated">Yes</span>` : "No"}</td>
+      <td><span class="status-pill status-${slug(s.status)}">${escapeHtml(s.status || "—")}</span></td>
+      <td>${escapeHtml(s.allocatedHostelId || "—")}</td>
+      <td>${escapeHtml(s.allocatedRoomId || "—")}</td>
+      <td>${s.allocationScore !== "" && s.allocationScore != null ? s.allocationScore : "—"}</td>
+    </tr>
+  `).join("");
+}
     msg.className = "form-message success";
     msg.textContent = `Loaded ${students.length} student(s)`;
   } catch (err) {
-    msg.textContent = err.message;
-    tbody.innerHTML = `<tr><td colspan="13" class="priority-empty">Unable to load priority list.</td></tr>`;
-  } finally {
+  msg.textContent = err.message;
+  tbody.innerHTML = `<tr><td colspan="15" class="priority-empty">Unable to load priority list.</td></tr>`;
+} finally {
     setLoading(btn, false);
   }
 }
